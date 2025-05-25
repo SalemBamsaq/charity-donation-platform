@@ -1,0 +1,287 @@
+﻿@model CampaignDetailViewModel
+@using Microsoft.AspNetCore.Identity
+@using CharityDonationPlatform.Domain.Models
+@inject UserManager<ApplicationUser> UserManager
+@{
+    ViewData["Title"] = Model.Campaign.Title;
+}
+
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Campaigns" asp-action="Index">Campaigns</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Campaign.Title</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Campaign Header -->
+            <div class="card shadow-sm mb-4">
+                <img src="@(string.IsNullOrEmpty(Model.Campaign.ImageUrl) ? "/images/default-campaign.jpg" : Model.Campaign.ImageUrl)"
+                     class="card-img-top" alt="@Model.Campaign.Title" style="height: 300px; object-fit: cover;" />
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h1 class="card-title h2">@Model.Campaign.Title</h1>
+                        <span class="badge bg-@(Model.Campaign.Status == "Active" ? "success" : Model.Campaign.Status == "Funded" ? "primary" : "secondary") fs-6">
+                            @Model.Campaign.Status
+                        </span>
+                    </div>
+
+                    <!-- Progress Stats -->
+                    <div class="row text-center mb-4">
+                        <div class="col-md-4">
+                            <h4 class="text-success">$@Model.Campaign.AmountRaised.ToString("N0")</h4>
+                            <small class="text-muted">Raised</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h4 class="text-primary">@Model.Campaign.ProgressPercentage.ToString("F1")%</h4>
+                            <small class="text-muted">Funded</small>
+                        </div>
+                        <div class="col-md-4">
+                            <h4 class="text-info">@Model.Campaign.DaysLeft</h4>
+                            <small class="text-muted">Days Left</small>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between small text-muted mb-2">
+                            <span>Goal: $@Model.Campaign.TargetAmount.ToString("N0")</span>
+                            <span>@Model.RecentDonations.Count() donors</span>
+                        </div>
+                        <div class="progress" style="height: 12px;">
+                            <div class="progress-bar bg-success" role="progressbar"
+                                 style="width: @Model.Campaign.ProgressPercentage%"
+                                 aria-valuenow="@Model.Campaign.ProgressPercentage"
+                                 aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+
+                    <!-- Campaign Description -->
+                    <div class="mb-4">
+                        <h5>About This Campaign</h5>
+                        <p class="lead">@Model.Campaign.Description</p>
+                    </div>
+
+                    <!-- Campaign Details -->
+                    <div class="row small text-muted">
+                        <div class="col-md-6">
+                            <i class="fas fa-calendar me-2"></i>Start: @Model.Campaign.StartDate.ToString("MMM dd, yyyy")
+                        </div>
+                        <div class="col-md-6">
+                            <i class="fas fa-calendar-check me-2"></i>End: @Model.Campaign.EndDate.ToString("MMM dd, yyyy")
+                        </div>
+                        <div class="col-md-6 mt-2">
+                            <i class="fas fa-user me-2"></i>Created by: @Model.Campaign.CreatedByName
+                        </div>
+                        <div class="col-md-6 mt-2">
+                            <i class="fas fa-clock me-2"></i>Created: @Model.Campaign.Created.ToString("MMM dd, yyyy")
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campaign Updates -->
+            @if (Model.Updates.Any())
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-newspaper me-2"></i>Campaign Updates</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var update in Model.Updates)
+                        {
+                            <div class="border-bottom pb-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h6>@update.Title</h6>
+                                    <small class="text-muted">@update.Created.ToString("MMM dd, yyyy")</small>
+                                </div>
+                                <p class="mb-2">@update.Content</p>
+                                @if (!string.IsNullOrEmpty(update.ImageUrl))
+                                {
+                                    <img src="@update.ImageUrl" alt="Update image" class="img-fluid rounded mb-2" style="max-height: 200px;" />
+                                }
+                                <small class="text-muted">By @update.CreatedByName</small>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+            <!-- Recent Donations -->
+            @if (Model.RecentDonations.Any())
+            {
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-heart me-2"></i>Recent Donations</h5>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var donation in Model.RecentDonations.Take(5))
+                        {
+                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                                <div>
+                                    <strong>@donation.DisplayDonorName</strong>
+                                    @if (!string.IsNullOrEmpty(donation.Message))
+                                    {
+                                        <br>
+
+                                        <small class="text-muted">"@donation.Message"</small>
+                                    }
+                                </div>
+                                <div class="text-end">
+                                    <span class="fw-bold text-success">$@donation.Amount.ToString("N0")</span>
+                                    <br><small class="text-muted">@donation.DonationDate.ToString("MMM dd")</small>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Donation Form -->
+            @if (User.Identity.IsAuthenticated && Model.Campaign.Status == "Active")
+            {
+                <div class="card shadow-sm mb-4 sticky-top" style="top: 20px;">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-donate me-2"></i>Make a Donation</h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-controller="Donations" asp-action="Donate" method="post">
+                            <input type="hidden" asp-for="NewDonation.CampaignId" value="@Model.Campaign.Id" />
+
+                            <div class="mb-3">
+                                <label class="form-label">Donation Amount</label>
+                                <div class="btn-group d-flex mb-2" role="group">
+                                    <input type="radio" class="btn-check" name="quickAmount" id="amount25" value="25">
+                                    <label class="btn btn-outline-primary" for="amount25">$25</label>
+
+                                    <input type="radio" class="btn-check" name="quickAmount" id="amount50" value="50">
+                                    <label class="btn btn-outline-primary" for="amount50">$50</label>
+
+                                    <input type="radio" class="btn-check" name="quickAmount" id="amount100" value="100">
+                                    <label class="btn btn-outline-primary" for="amount100">$100</label>
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input asp-for="NewDonation.Amount" class="form-control" placeholder="Enter amount" required />
+                                </div>
+                                <span asp-validation-for="NewDonation.Amount" class="text-danger"></span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="NewDonation.Message" class="form-label">Message (Optional)</label>
+                                <textarea asp-for="NewDonation.Message" class="form-control" rows="3" placeholder="Leave a message of support"></textarea>
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input asp-for="NewDonation.IsAnonymous" class="form-check-input" />
+                                <label asp-for="NewDonation.IsAnonymous" class="form-check-label">
+                                    Donate anonymously
+                                </label>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="fas fa-heart me-2"></i>Donate Now
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+            else if (!User.Identity.IsAuthenticated)
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body text-center">
+                        <h5>Support This Campaign</h5>
+                        <p class="text-muted">Login to make a donation and support this cause.</p>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to Donate
+                        </a>
+                    </div>
+                </div>
+            }
+
+            <!-- Admin Actions -->
+            @{
+                var currentUserId = UserManager.GetUserId(User);
+                var canManage = User.IsInRole("Admin") || (User.IsInRole("Staff") && Model.Campaign.CreatedById == currentUserId);
+            }
+
+            @if (canManage)
+            {
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-cog me-2"></i>Campaign Management</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a asp-action="Edit" asp-route-id="@Model.Campaign.Id" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-edit me-2"></i>Edit Campaign
+                            </a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <a asp-action="Delete" asp-route-id="@Model.Campaign.Id" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-trash me-2"></i>Delete Campaign
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Update Form -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h6 class="mb-0"><i class="fas fa-plus me-2"></i>Add Update</h6>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="AddUpdate" method="post" enctype="multipart/form-data">
+                            <input type="hidden" asp-for="NewUpdate.CampaignId" value="@Model.Campaign.Id" />
+
+                            <div class="mb-3">
+                                <label asp-for="NewUpdate.Title" class="form-label">Title</label>
+                                <input asp-for="NewUpdate.Title" class="form-control form-control-sm" required />
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="NewUpdate.Content" class="form-label">Content</label>
+                                <textarea asp-for="NewUpdate.Content" class="form-control form-control-sm" rows="3" required></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="NewUpdate.ImageFile" class="form-label">Image (Optional)</label>
+                                <input asp-for="NewUpdate.ImageFile" class="form-control form-control-sm" type="file" accept="image/*" />
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="fas fa-plus me-2"></i>Add Update
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Quick amount selection
+        document.querySelectorAll('input[name="quickAmount"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                if (this.checked) {
+                    document.getElementById('NewDonation_Amount').value = this.value;
+                }
+            });
+        });
+    </script>
+}

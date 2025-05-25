@@ -1,0 +1,144 @@
+﻿@model DonationListViewModel
+@{
+    ViewData["Title"] = "My Donations";
+}
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 fw-bold">My Donations</h1>
+            <p class="lead text-muted">Track your giving history and impact</p>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-gradient-success text-white">
+                <div class="card-body text-center">
+                    <h5 class="mb-1">Total Donated</h5>
+                    <h2 class="fw-bold">$@Model.TotalAmount.ToString("N2")</h2>
+                    <small>@Model.TotalCount donations made</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Donations.Any())
+    {
+        <div class="row">
+            @foreach (var donationItem in Model.Donations)
+            {
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="card shadow-sm h-100 donation-card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0 text-truncate">@donationItem.CampaignTitle</h6>
+                            <span class="badge bg-@(donationItem.Status == "Completed" ? "success" : donationItem.Status == "Pending" ? "warning" : "secondary")">
+                                @donationItem.Status
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center mb-3">
+                                <div class="col-6">
+                                    <h4 class="text-success mb-1">$@donationItem.Amount.ToString("N2")</h4>
+                                    <small class="text-muted">Amount</small>
+                                </div>
+                                <div class="col-6">
+                                    <h4 class="text-primary mb-1">@donationItem.DonationDate.ToString("MMM dd")</h4>
+                                    <small class="text-muted">@donationItem.DonationDate.Year</small>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(donationItem.Message))
+                            {
+                                <div class="mb-3">
+                                    <small class="text-muted d-block">Your message:</small>
+                                    <p class="small text-dark fst-italic bg-light p-2 rounded">
+                                        "@donationItem.Message"
+                                    </p>
+                                </div>
+                            }
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-credit-card me-1"></i>@(donationItem.PaymentMethod ?? "N/A")
+                                    </small>
+                                    @if (donationItem.IsAnonymous)
+                                    {
+                                        <small class="text-info">
+                                            <i class="fas fa-user-secret me-1"></i>Anonymous
+                                        </small>
+                                    }
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <a asp-controller="Campaigns" asp-action="Details" asp-route-id="@donationItem.CampaignId"
+                                       class="btn btn-outline-primary btn-sm" title="View Campaign">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-action="Receipt" asp-route-id="@donationItem.Id"
+                                       class="btn btn-outline-secondary btn-sm" title="Download Receipt">
+                                        <i class="fas fa-receipt"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <small class="text-muted">
+                                <i class="fas fa-hashtag me-1"></i>Transaction:
+                                @{
+                                    string transactionDisplay = "N/A";
+                                    if (!string.IsNullOrEmpty(donationItem.TransactionId))
+                                    {
+                                        transactionDisplay = donationItem.TransactionId.Length > 8 ?
+                                        donationItem.TransactionId.Substring(0, 8) + "..." :
+                                        donationItem.TransactionId;
+                                    }
+                                }
+                                @transactionDisplay
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination placeholder if needed -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <p class="text-muted">Showing @Model.Donations.Count() of @Model.TotalCount donations</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card border-0 bg-light">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-heart fa-4x text-muted mb-4"></i>
+                        <h4 class="mb-3">No donations yet</h4>
+                        <p class="text-muted mb-4">
+                            Start making a difference by supporting campaigns you care about.
+                            Every donation, no matter the size, creates positive impact.
+                        </p>
+                        <a asp-controller="Campaigns" asp-action="Index" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search me-2"></i>Browse Campaigns
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .donation-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+        .donation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+    .bg-gradient-success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+</style>

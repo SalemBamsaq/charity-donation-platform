@@ -1,0 +1,81 @@
+﻿@model ProfileViewModel
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h3><i class="fas fa-user-edit me-2"></i>My Profile</h3>
+                </div>
+                <div class="card-body p-4">
+                    @if (TempData["StatusMessage"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            @TempData["StatusMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="Profile" method="post" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4 text-center">
+                                @if (!string.IsNullOrEmpty(Model.ProfilePictureUrl))
+                                {
+                                    <img src="@Model.ProfilePictureUrl" alt="Profile Picture" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <div class="bg-light rounded-circle mb-3 d-flex align-items-center justify-content-center" style="width: 150px; height: 150px;">
+                                        <i class="fas fa-user fa-4x text-muted"></i>
+                                    </div>
+                                }
+                                <div>
+                                    <label asp-for="ProfilePicture" class="form-label">Change Picture</label>
+                                    <input asp-for="ProfilePicture" class="form-control" type="file" accept="image/*" />
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="FirstName" class="form-label">First Name</label>
+                                        <input asp-for="FirstName" class="form-control" />
+                                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="LastName" class="form-label">Last Name</label>
+                                        <input asp-for="LastName" class="form-control" />
+                                        <span asp-validation-for="LastName" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Email" class="form-label">Email</label>
+                                    <input asp-for="Email" class="form-control" readonly />
+                                    <div class="form-text">Email cannot be changed</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                            <button type="submit" class="btn btn-info">
+                                <i class="fas fa-save me-2"></i>Update Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

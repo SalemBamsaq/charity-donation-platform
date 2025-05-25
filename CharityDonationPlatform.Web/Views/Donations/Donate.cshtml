@@ -1,0 +1,120 @@
+﻿@model DonationCreateViewModel
+@{
+    ViewData["Title"] = "Make a Donation";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white text-center">
+                    <h3><i class="fas fa-heart me-2"></i>Make a Donation</h3>
+                    <p class="mb-0">to @ViewBag.CampaignTitle</p>
+                </div>
+                <div class="card-body p-4">
+                    @if (!string.IsNullOrEmpty(ViewBag.CampaignImage))
+                    {
+                        <div class="text-center mb-4">
+                            <img src="@ViewBag.CampaignImage" alt="Campaign" class="img-fluid rounded" style="max-height: 200px;" />
+                        </div>
+                    }
+
+                    <form asp-action="Donate" method="post">
+                        <input type="hidden" asp-for="CampaignId" />
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Select Amount</label>
+                            <div class="row g-2 mb-3">
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="quickAmount" id="amount25" value="25">
+                                    <label class="btn btn-outline-primary w-100" for="amount25">$25</label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="quickAmount" id="amount50" value="50">
+                                    <label class="btn btn-outline-primary w-100" for="amount50">$50</label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="quickAmount" id="amount100" value="100">
+                                    <label class="btn btn-outline-primary w-100" for="amount100">$100</label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="quickAmount" id="amount250" value="250">
+                                    <label class="btn btn-outline-primary w-100" for="amount250">$250</label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="quickAmount" id="amount500" value="500">
+                                    <label class="btn btn-outline-primary w-100" for="amount500">$500</label>
+                                </div>
+                                <div class="col-4">
+                                    <input type="radio" class="btn-check" name="quickAmount" id="amount1000" value="1000">
+                                    <label class="btn btn-outline-primary w-100" for="amount1000">$1000</label>
+                                </div>
+                            </div>
+
+                            <label asp-for="Amount" class="form-label">Custom Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="Amount" class="form-control form-control-lg" placeholder="Enter amount" />
+                            </div>
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Message" class="form-label">Message of Support (Optional)</label>
+                            <textarea asp-for="Message" class="form-control" rows="3" placeholder="Share why this cause matters to you"></textarea>
+                            <span asp-validation-for="Message" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input asp-for="IsAnonymous" class="form-check-input" />
+                                <label asp-for="IsAnonymous" class="form-check-label">
+                                    Make this donation anonymous
+                                </label>
+                                <div class="form-text">Your name will not be shown publicly</div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-donate me-2"></i>Donate Now
+                            </button>
+                            <a asp-controller="Campaigns" asp-action="Details" asp-route-id="@Model.CampaignId"
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Campaign
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer bg-light text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-shield-alt me-1"></i>Your donation is secure and encrypted
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Quick amount selection
+        document.querySelectorAll('input[name="quickAmount"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                if (this.checked) {
+                    document.getElementById('Amount').value = this.value;
+                }
+            });
+        });
+
+        // Custom amount input
+        document.getElementById('Amount').addEventListener('input', function () {
+            // Uncheck quick amount buttons when custom amount is entered
+            document.querySelectorAll('input[name="quickAmount"]').forEach(radio => {
+                radio.checked = false;
+            });
+        });
+    </script>
+}

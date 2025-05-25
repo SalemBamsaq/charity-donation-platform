@@ -1,0 +1,118 @@
+﻿@model DonationViewModel
+@{
+    ViewData["Title"] = "Donation Receipt";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white text-center">
+                    <h3><i class="fas fa-receipt me-2"></i>Donation Receipt</h3>
+                </div>
+                <div class="card-body p-5">
+                    <!-- Receipt Header -->
+                    <div class="text-center mb-4">
+                        <h2 class="text-success">Charity Donation Platform</h2>
+                        <p class="text-muted">Official Donation Receipt</p>
+                    </div>
+
+                    <!-- Receipt Details -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Receipt Information</h6>
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td><strong>Receipt #:</strong></td>
+                                    <td>@Model.Id.ToString("D6")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Date:</strong></td>
+                                    <td>@Model.DonationDate.ToString("MMMM dd, yyyy")</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Transaction:</strong></td>
+                                    <td>@Model.TransactionId</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Status:</strong></td>
+                                    <td><span class="badge bg-success">@Model.Status</span></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Donation Details</h6>
+                            <table class="table table-borderless table-sm">
+                                <tr>
+                                    <td><strong>Campaign:</strong></td>
+                                    <td>@Model.CampaignTitle</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Amount:</strong></td>
+                                    <td class="text-success fs-5"><strong>$@Model.Amount.ToString("N2")</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Method:</strong></td>
+                                    <td>@Model.PaymentMethod</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Anonymous:</strong></td>
+                                    <td>@(Model.IsAnonymous ? "Yes" : "No")</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Message))
+                    {
+                        <div class="mb-4">
+                            <h6>Your Message</h6>
+                            <div class="bg-light p-3 rounded">
+                                <em>"@Model.Message"</em>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Thank You Message -->
+                    <div class="text-center bg-light p-4 rounded mb-4">
+                        <h5 class="text-success mb-3">Thank You for Your Generosity!</h5>
+                        <p class="mb-0">Your donation makes a real difference in creating positive change. This receipt serves as confirmation of your charitable contribution.</p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <button onclick="window.print()" class="btn btn-primary">
+                            <i class="fas fa-print me-2"></i>Print Receipt
+                        </button>
+                        <a asp-controller="Campaigns" asp-action="Details" asp-route-id="@Model.CampaignId"
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-eye me-2"></i>View Campaign
+                        </a>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Donations
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer text-center text-muted">
+                    <small>This receipt was generated on @DateTime.Now.ToString("MMMM dd, yyyy 'at' h:mm tt")</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Print Styles -->
+<style media="print">
+    .btn, .card-footer, nav, .navbar, .breadcrumb {
+        display: none !important;
+    }
+
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    .container {
+        max-width: 100% !important;
+    }
+</style>

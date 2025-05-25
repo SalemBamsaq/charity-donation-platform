@@ -1,0 +1,260 @@
+﻿@model NotificationListViewModel
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-5 fw-bold">
+                <i class="fas fa-bell me-3"></i>Notifications
+                @if (Model.UnreadCount > 0)
+                {
+                    <span class="badge bg-danger">@Model.UnreadCount</span>
+                }
+            </h1>
+            <p class="lead text-muted">Stay updated on your campaigns and donations</p>
+        </div>
+        <div class="col-md-4 text-end">
+            @if (Model.UnreadCount > 0)
+            {
+                <form asp-action="MarkAllAsRead" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="fas fa-check-double me-2"></i>Mark All Read
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+
+    @if (Model.Notifications.Any())
+    {
+        
+        
+            var unreadNotifications = Model.Notifications.Where(n => !n.IsRead).ToList();
+            var readNotifications = Model.Notifications.Where(n => n.IsRead).ToList();
+        
+        
+        @if (unreadNotifications.Any())
+        {
+            <div class="mb-4">
+                <h5 class="text-primary mb-3">
+                    <i class="fas fa-bell-on me-2"></i>New Notifications (@unreadNotifications.Count())
+                </h5>
+                <div class="list-group">
+                    @foreach (var notification in unreadNotifications)
+                    {
+                        <div class="list-group-item list-group-item-action border-start border-primary border-4">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="@notification.IconClass me-2"></i>
+                                        <h6 class="mb-0 fw-bold text-dark">@notification.Title</h6>
+                                        <span class="badge bg-primary ms-2">New</span>
+                                    </div>
+                                    <p class="mb-2 text-dark">@notification.Message</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>@notification.TimeAgo
+                                    </small>
+                                </div>
+                                <div class="ms-3">
+                                    <form asp-action="MarkAsRead" asp-route-id="@notification.Id" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-outline-success btn-sm" title="Mark as read">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        @if (readNotifications.Any())
+        {
+            <div class="mb-4">
+                <h6 class="text-muted mb-3">
+                    <i class="fas fa-history me-2"></i>Earlier Notifications
+                </h6>
+                <div class="list-group">
+                    @foreach (var notification in readNotifications.Take(10))
+                    {
+                        <div class="list-group-item bg-light">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="@notification.IconClass me-2 opacity-75"></i>
+                                        <h6 class="mb-0 text-muted">@notification.Title</h6>
+                                        <i class="fas fa-check-circle text-success ms-2" title="Read"></i>
+                                    </div>
+                                    <p class="mb-1 text-muted small">@notification.Message</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>@notification.TimeAgo
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                
+                @if (readNotifications.Count() > 10)
+                {
+                    <div class="text-center mt-3">
+                        <p class="text-muted small">
+                            And @(readNotifications.Count() - 10) more older notifications...
+                        </p>
+                    </div>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card border-0 bg-light">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-bell-slash fa-4x text-muted mb-4"></i>
+                        <h4 class="mb-3">No notifications yet</h4>
+                        <p class="text-muted mb-4">
+                            You're all caught up! We'll notify you when there are updates 
+                            about your donations, campaigns you support, or platform news.
+                        </p>
+                        <div class="d-flex gap-2 justify-content-center flex-wrap">
+                            <a asp-controller="Dashboard" asp-action="Index" class="btn btn-primary">
+                                <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                            </a>
+                            <a asp-controller="Campaigns" asp-action="Index" class="btn btn-outline-primary">
+                                <i class="fas fa-search me-2"></i>Browse Campaigns
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Notification Settings (Optional Enhancement) -->
+    @if (Model.Notifications.Any())
+    {
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-cog me-2"></i>Notification Preferences
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">
+                            You receive notifications for donations you make, campaigns you support, and important platform updates.
+                        </p>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" checked disabled>
+                                    <label class="form-check-label text-muted">
+                                        <i class="fas fa-heart me-2 text-success"></i>Donation confirmations
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" checked disabled>
+                                    <label class="form-check-label text-muted">
+                                        <i class="fas fa-bullhorn me-2 text-primary"></i>Campaign updates
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" checked disabled>
+                                    <label class="form-check-label text-muted">
+                                        <i class="fas fa-trophy me-2 text-warning"></i>Goal achievements
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+.list-group-item {
+    transition: all 0.2s ease;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa !important;
+}
+
+.border-4 {
+    border-width: 4px !important;
+}
+</style>
+
+@section Scripts {
+    <script>
+        // Auto-refresh notification count in navbar
+        function updateNotificationBadge() {
+            fetch('/api/Notifications/count')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('notification-badge');
+                    if (badge) {
+                        if (data.count > 0) {
+                            badge.textContent = data.count;
+                            badge.style.display = 'inline';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(console.error);
+        }
+
+        // Update badge when page loads
+        updateNotificationBadge();
+
+        // Handle mark as read buttons
+        document.querySelectorAll('form[action*="MarkAsRead"]').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Remove the notification from view or mark it as read
+                        const listItem = this.closest('.list-group-item');
+                        listItem.classList.remove('border-primary');
+                        listItem.classList.add('bg-light');
+                        
+                        const badge = listItem.querySelector('.badge');
+                        if (badge) badge.remove();
+                        
+                        const button = this.querySelector('button');
+                        button.innerHTML = '<i class="fas fa-check-circle text-success"></i>';
+                        button.disabled = true;
+                        
+                        // Update notification count
+                        updateNotificationBadge();
+                        
+                        // Update page counter
+                        setTimeout(() => location.reload(), 1000);
+                    }
+                })
+                .catch(console.error);
+            });
+        });
+    </script>
+}
+

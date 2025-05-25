@@ -1,0 +1,83 @@
+﻿@model DonationViewModel
+@{
+    ViewData["Title"] = "Thank You";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow text-center">
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <i class="fas fa-heart fa-5x text-success mb-3"></i>
+                        <h1 class="display-4 text-success">Thank You!</h1>
+                        <p class="lead">Your donation has been successfully processed.</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 offset-md-3">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5>Donation Details</h5>
+                                    <hr>
+                                    <div class="row text-start">
+                                        <div class="col-6"><strong>Campaign:</strong></div>
+                                        <div class="col-6">@Model.CampaignTitle</div>
+
+                                        <div class="col-6"><strong>Amount:</strong></div>
+                                        <div class="col-6">$@Model.Amount.ToString("N2")</div>
+
+                                        <div class="col-6"><strong>Date:</strong></div>
+                                        <div class="col-6">@Model.DonationDate.ToString("MMM dd, yyyy")</div>
+
+                                        <div class="col-6"><strong>Transaction:</strong></div>
+                                        <div class="col-6">@Model.TransactionId</div>
+
+                                        <div class="col-6"><strong>Status:</strong></div>
+                                        <div class="col-6">
+                                            <span class="badge bg-success">@Model.Status</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.Message))
+                    {
+                        <div class="alert alert-info">
+                            <strong>Your message:</strong> "@Model.Message"
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a asp-controller="Campaigns" asp-action="Details" asp-route-id="@Model.CampaignId"
+                           class="btn btn-primary">
+                            <i class="fas fa-eye me-2"></i>View Campaign
+                        </a>
+                        <a asp-action="Receipt" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+                            <i class="fas fa-receipt me-2"></i>Download Receipt
+                        </a>
+                        <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-primary">
+                            <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What's Next -->
+            <div class="card mt-4">
+                <div class="card-body text-center">
+                    <h5>What's Next?</h5>
+                    <p class="text-muted">
+                        You'll receive a confirmation email shortly. You can track the campaign's progress
+                        and receive updates about how your donation is making a difference.
+                    </p>
+                    <a asp-controller="Campaigns" asp-action="Index" class="btn btn-success">
+                        <i class="fas fa-search me-2"></i>Support More Causes
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
