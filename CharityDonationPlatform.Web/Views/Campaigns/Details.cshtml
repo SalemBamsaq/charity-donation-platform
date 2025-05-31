@@ -127,7 +127,6 @@
                                     @if (!string.IsNullOrEmpty(donation.Message))
                                     {
                                         <br>
-
                                         <small class="text-muted">"@donation.Message"</small>
                                     }
                                 </div>
@@ -144,7 +143,7 @@
 
         <!-- Sidebar -->
         <div class="col-lg-4">
-            <!-- Donation Form -->
+            <!-- FIXED DONATION FORM -->
             @if (User.Identity.IsAuthenticated && Model.Campaign.Status == "Active")
             {
                 <div class="card shadow-sm mb-4 sticky-top" style="top: 20px;">
@@ -153,7 +152,11 @@
                     </div>
                     <div class="card-body">
                         <form asp-controller="Donations" asp-action="Donate" method="post">
-                            <input type="hidden" asp-for="NewDonation.CampaignId" value="@Model.Campaign.Id" />
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="CampaignId" value="@Model.Campaign.Id" />
+
+                            <!-- Validation Summary for form errors -->
+                            <div class="alert alert-danger" role="alert" style="display: none;" id="donationErrors"></div>
 
                             <div class="mb-3">
                                 <label class="form-label">Donation Amount</label>
@@ -169,25 +172,26 @@
                                 </div>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
-                                    <input asp-for="NewDonation.Amount" class="form-control" placeholder="Enter amount" required />
+                                    <input name="Amount" id="donationAmount" class="form-control" placeholder="Enter amount" required min="1" step="0.01" type="number" />
                                 </div>
-                                <span asp-validation-for="NewDonation.Amount" class="text-danger"></span>
+                                <span class="text-danger" id="amountError"></span>
                             </div>
 
                             <div class="mb-3">
-                                <label asp-for="NewDonation.Message" class="form-label">Message (Optional)</label>
-                                <textarea asp-for="NewDonation.Message" class="form-control" rows="3" placeholder="Leave a message of support"></textarea>
+                                <label class="form-label">Message (Optional)</label>
+                                <textarea name="Message" class="form-control" rows="3" placeholder="Leave a message of support" maxlength="500"></textarea>
                             </div>
 
                             <div class="mb-3 form-check">
-                                <input asp-for="NewDonation.IsAnonymous" class="form-check-input" />
-                                <label asp-for="NewDonation.IsAnonymous" class="form-check-label">
+                                <input name="IsAnonymous" class="form-check-input" type="checkbox" value="true" />
+                                <input name="IsAnonymous" type="hidden" value="false" />
+                                <label class="form-check-label">
                                     Donate anonymously
                                 </label>
                             </div>
 
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-success btn-lg">
+                                <button type="submit" class="btn btn-success btn-lg" id="donateBtn">
                                     <i class="fas fa-heart me-2"></i>Donate Now
                                 </button>
                             </div>
@@ -275,13 +279,104 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        // Quick amount selection
+        // FIXED: Quick amount selection
         document.querySelectorAll('input[name="quickAmount"]').forEach(radio => {
             radio.addEventListener('change', function () {
                 if (this.checked) {
-                    document.getElementById('NewDonation_Amount').value = this.value;
+                    document.getElementById('donationAmount').value = this.value;
+                    clearAmountError();
                 }
             });
         });
+
+        // FIXED: Custom amount input
+        document.getElementById('donationAmount')?.addEventListener('input', function () {
+            // Uncheck quick amount buttons when custom amount is entered
+            document.querySelectorAll('input[name="quickAmount"]').forEach(radio => {
+                radio.checked = false;
+            });
+            clearAmountError();
+        });
+
+        // FIXED: Form validation and submission
+        document.querySelector('form[action*="Donate"]')?.addEventListener('submit', function (e) {
+            const amount = parseFloat(document.getElementById('donationAmount').value);
+            const submitBtn = document.getElementById('donateBtn');
+
+            // Clear previous errors
+            clearAmountError();
+            hideValidationErrors();
+
+            // Validate amount
+            if (isNaN(amount) || amount < 1) {
+                e.preventDefault();
+                showAmountError('Please enter a valid donation amount of at least $1');
+                return false;
+            }
+
+            if (amount > 1000000) {
+                e.preventDefault();
+                showAmountError('Maximum donation amount is $1,000,000');
+                return false;
+            }
+
+            // Show loading state
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+            submitBtn.disabled = true;
+
+            // Re-enable button after 15 seconds as fallback
+            setTimeout(function () {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 15000);
+
+            console.log('Donation form submitted:', {
+                campaignId: document.querySelector('input[name="CampaignId"]').value,
+                amount: amount,
+                isAnonymous: document.querySelector('input[name="IsAnonymous"]:checked')?.value === 'true',
+                message: document.querySelector('textarea[name="Message"]').value
+            });
+        });
+
+        function showAmountError(message) {
+            const errorElement = document.getElementById('amountError');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+        }
+
+        function clearAmountError() {
+            const errorElement = document.getElementById('amountError');
+            if (errorElement) {
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+            }
+        }
+
+        function showValidationErrors(message) {
+            const errorElement = document.getElementById('donationErrors');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.style.display = 'block';
+            }
+        }
+
+        function hideValidationErrors() {
+            const errorElement = document.getElementById('donationErrors');
+            if (errorElement) {
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+            }
+        }
+
+        // Check for TempData messages on page load
+        document.addEventListener('DOMContentLoaded', function () {
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>showValidationErrors('@Html.Raw(TempData["ErrorMessage"])'); </text>
+        }
+                });
     </script>
 }

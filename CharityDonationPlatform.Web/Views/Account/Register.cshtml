@@ -3,70 +3,283 @@
     ViewData["Title"] = "Register";
 }
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <div class="card shadow">
-                <div class="card-header bg-success text-white text-center">
-                    <h3><i class="fas fa-user-plus me-2"></i>Create Account</h3>
+<section class="py-5" style="background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); min-height: 100vh; display: flex; align-items: center;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <div class="card border-0" style="border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden;">
+                    <!-- Header -->
+                    <div class="card-header border-0 text-center" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); padding: 40px 30px;">
+                        <h2 class="fw-bold mb-2" style="color: white;">
+                            <i class="fas fa-user-plus me-2"></i>Join Our Community
+                        </h2>
+                        <p class="mb-0" style="color: rgba(255,255,255,0.9);">Start making a difference today</p>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="card-body" style="padding: 40px 30px;">
+                        <form asp-controller="Account" asp-action="Register" method="post" enctype="multipart/form-data" asp-route-returnurl="@ViewData["ReturnUrl"]">
+                            @Html.AntiForgeryToken()
+                            <div asp-validation-summary="All" class="alert alert-danger mb-4" role="alert" style="border-radius: 12px; border: none; background-color: #fef2f2; color: #dc2626;"></div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label asp-for="FirstName" class="form-label fw-semibold" style="color: #1e293b; font-size: 0.95rem;">First Name</label>
+                                    <input asp-for="FirstName" class="form-control" style="border-radius: 12px; border: 2px solid #e2e8f0; padding: 12px 16px; font-size: 1rem; transition: all 0.3s ease;" placeholder="Enter first name" />
+                                    <span asp-validation-for="FirstName" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <label asp-for="LastName" class="form-label fw-semibold" style="color: #1e293b; font-size: 0.95rem;">Last Name</label>
+                                    <input asp-for="LastName" class="form-control" style="border-radius: 12px; border: 2px solid #e2e8f0; padding: 12px 16px; font-size: 1rem; transition: all 0.3s ease;" placeholder="Enter last name" />
+                                    <span asp-validation-for="LastName" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="Email" class="form-label fw-semibold" style="color: #1e293b; font-size: 0.95rem;">Email Address</label>
+                                <input asp-for="Email" class="form-control" style="border-radius: 12px; border: 2px solid #e2e8f0; padding: 12px 16px; font-size: 1rem; transition: all 0.3s ease;" placeholder="Enter your email" />
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label asp-for="Password" class="form-label fw-semibold" style="color: #1e293b; font-size: 0.95rem;">Password</label>
+                                    <input asp-for="Password" class="form-control" id="Password" style="border-radius: 12px; border: 2px solid #e2e8f0; padding: 12px 16px; font-size: 1rem; transition: all 0.3s ease;" placeholder="Enter password" />
+                                    <span asp-validation-for="Password" class="text-danger small"></span>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <label asp-for="ConfirmPassword" class="form-label fw-semibold" style="color: #1e293b; font-size: 0.95rem;">Confirm Password</label>
+                                    <input asp-for="ConfirmPassword" class="form-control" style="border-radius: 12px; border: 2px solid #e2e8f0; padding: 12px 16px; font-size: 1rem; transition: all 0.3s ease;" placeholder="Confirm password" />
+                                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label asp-for="ProfilePicture" class="form-label fw-semibold" style="color: #1e293b; font-size: 0.95rem;">
+                                    Profile Picture
+                                    <span class="badge" style="background-color: #e2e8f0; color: #64748b; font-size: 0.7rem; font-weight: 500; margin-left: 8px;">Optional</span>
+                                </label>
+                                <input asp-for="ProfilePicture" class="form-control" id="ProfilePicture" type="file" accept="image/*" style="border-radius: 12px; border: 2px dashed #cbd5e1; padding: 12px 16px; font-size: 1rem; transition: all 0.3s ease; background-color: #fafbfc;" />
+                                <div class="form-text" style="color: #64748b; font-size: 0.85rem;">
+                                    <i class="fas fa-camera me-1" style="color: #2563eb;"></i>
+                                    <strong>Optional:</strong> Upload a profile picture to personalize your account.
+                                    <br><small>Accepted formats: JPG, PNG, GIF • Max size: 5MB • You can skip this step</small>
+                                </div>
+                                <span asp-validation-for="ProfilePicture" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mb-4">
+                                <div class="card" style="background-color: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+                                    <h6 class="fw-bold mb-3" style="color: #1e293b;">
+                                        <i class="fas fa-shield-alt me-2" style="color: #2563eb;"></i>Password Requirements
+                                    </h6>
+                                    <ul class="list-unstyled mb-0" style="font-size: 0.9rem; color: #64748b;">
+                                        <li class="mb-1"><i class="fas fa-check me-2" style="color: #10b981;"></i>At least 6 characters long</li>
+                                        <li class="mb-1"><i class="fas fa-check me-2" style="color: #10b981;"></i>Contains uppercase and lowercase letters</li>
+                                        <li class="mb-1"><i class="fas fa-check me-2" style="color: #10b981;"></i>Contains at least one number</li>
+                                        <li class="mb-0"><i class="fas fa-check me-2" style="color: #10b981;"></i>Mix of letters and numbers recommended</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="d-grid mb-4">
+                                <button type="submit" class="btn btn-primary fw-bold py-3" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; border-radius: 12px; font-size: 1.1rem; transition: all 0.3s ease;">
+                                    <i class="fas fa-user-plus me-2"></i>Create Account
+                                </button>
+                            </div>
+
+                            <div class="text-center">
+                                <p class="mb-0" style="color: #64748b;">
+                                    Already have an account?
+                                    <a asp-action="Login" style="color: #2563eb; text-decoration: none; font-weight: 600;">
+                                        Login here
+                                    </a>
+                                </p>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-                <div class="card-body p-4">
-                    <form asp-action="Register" method="post" enctype="multipart/form-data">
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="FirstName" class="form-label">First Name</label>
-                                <input asp-for="FirstName" class="form-control" placeholder="Enter first name" />
-                                <span asp-validation-for="FirstName" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="LastName" class="form-label">Last Name</label>
-                                <input asp-for="LastName" class="form-control" placeholder="Enter last name" />
-                                <span asp-validation-for="LastName" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="Email" class="form-label">Email</label>
-                            <input asp-for="Email" class="form-control" placeholder="Enter your email" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
-                        </div>
-
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label asp-for="Password" class="form-label">Password</label>
-                                <input asp-for="Password" class="form-control" placeholder="Enter password" />
-                                <span asp-validation-for="Password" class="text-danger"></span>
-                            </div>
-                            <div class="col-md-6">
-                                <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
-                                <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm password" />
-                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label asp-for="ProfilePicture" class="form-label">Profile Picture (Optional)</label>
-                            <input asp-for="ProfilePicture" class="form-control" type="file" accept="image/*" />
-                            <span asp-validation-for="ProfilePicture" class="text-danger"></span>
-                        </div>
-
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-user-plus me-2"></i>Create Account
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                <div class="card-footer text-center">
-                    <p class="mb-0">Already have an account? <a asp-action="Login">Login here</a></p>
+                <!-- Additional Info -->
+                <div class="text-center mt-4">
+                    <p class="text-muted">
+                        <i class="fas fa-heart me-2" style="color: #2563eb;"></i>
+                        Join thousands of donors making a difference worldwide
+                    </p>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<style>
+    .form-control:focus {
+        border-color: #2563eb !important;
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25) !important;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+    }
+
+    a:hover {
+        text-decoration: underline !important;
+    }
+
+    .form-control[type="file"]::-webkit-file-upload-button {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        margin-right: 12px;
+        font-weight: 500;
+    }
+</style>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Debug: Add form submission logging
+        $('form').on('submit', function (e) {
+            console.log('Form submission started');
+            console.log('Form data:', new FormData(this));
+
+            // Show loading state
+            var submitBtn = $(this).find('button[type="submit"]');
+            var originalText = submitBtn.html();
+            submitBtn.html('<i class="fas fa-spinner fa-spin me-2"></i>Creating Account...').prop('disabled', true);
+
+            // Re-enable button after 15 seconds as fallback
+            setTimeout(function () {
+                submitBtn.html(originalText).prop('disabled', false);
+                console.log('Button re-enabled after timeout');
+            }, 15000);
+        });
+
+        // Add error handling
+        $(document).ajaxError(function (event, xhr, settings, error) {
+            console.error('AJAX Error:', error);
+            console.error('Response:', xhr.responseText);
+        });
+
+        // Check if jQuery is loaded
+        if (typeof $ === 'undefined') {
+            console.error('jQuery is not loaded!');
+            alert('jQuery is not loaded. The form may not work properly.');
+        } else {
+            console.log('jQuery is loaded successfully');
+        }
+
+        // Remove validation issues for ProfilePicture
+        $(document).ready(function () {
+            // Completely disable validation for ProfilePicture
+            $('#ProfilePicture').removeAttr('data-val-required')
+                .removeAttr('required')
+                .removeAttr('data-val')
+                .attr('data-val', 'false');
+
+            // Clear any existing validation errors
+            $('span[data-valmsg-for="ProfilePicture"]').text('').hide();
+
+            // Also disable validation for ProfilePictureUrl if it exists
+            $('input[name="ProfilePictureUrl"]').removeAttr('data-val-required')
+                .removeAttr('required')
+                .removeAttr('data-val')
+                .attr('data-val', 'false');
+
+            $('span[data-valmsg-for="ProfilePictureUrl"]').text('').hide();
+        });
+
+        // Image preview functionality
+        document.getElementById('ProfilePicture').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Check file size (5MB limit)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    this.value = '';
+                    return;
+                }
+
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    let preview = document.getElementById('imagePreview');
+                    if (!preview) {
+                        preview = document.createElement('div');
+                        preview.id = 'imagePreview';
+                        preview.className = 'mt-3 text-center';
+                        document.getElementById('ProfilePicture').parentNode.appendChild(preview);
+                    }
+
+                    preview.innerHTML = `
+                                        <div class="card" style="border-radius: 12px; background-color: #f8fafc; border: 2px solid #e2e8f0; padding: 15px; max-width: 200px; margin: 0 auto;">
+                                            <img src="${e.target.result}" alt="Preview" class="img-fluid" style="border-radius: 8px; max-height: 120px; object-fit: cover;" />
+                                            <div class="form-text mt-2" style="color: #64748b;">Profile picture preview</div>
+                                            <button type="button" class="btn btn-sm mt-2" onclick="clearImagePreview()" style="background-color: #e2e8f0; color: #64748b; border: none; border-radius: 6px; font-size: 0.8rem;">
+                                                <i class="fas fa-times me-1"></i>Remove
+                                            </button>
+                                        </div>
+                                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                const preview = document.getElementById('imagePreview');
+                if (preview) {
+                    preview.remove();
+                }
+            }
+        });
+
+        // Function to clear image preview
+        function clearImagePreview() {
+            document.getElementById('ProfilePicture').value = '';
+            const preview = document.getElementById('imagePreview');
+            if (preview) {
+                preview.remove();
+            }
+        }
+
+        // Password strength indicator
+        document.getElementById('Password').addEventListener('input', function () {
+            const password = this.value;
+            let strength = document.getElementById('passwordStrength');
+
+            if (!strength) {
+                strength = document.createElement('div');
+                strength.id = 'passwordStrength';
+                strength.className = 'form-text mt-2';
+                this.parentNode.appendChild(strength);
+            }
+
+            let score = 0;
+            let feedback = [];
+
+            if (password.length >= 6) score++; else feedback.push('at least 6 characters');
+            if (/[a-z]/.test(password)) score++; else feedback.push('lowercase letter');
+            if (/[A-Z]/.test(password)) score++; else feedback.push('uppercase letter');
+            if (/[0-9]/.test(password)) score++; else feedback.push('number');
+
+            const colors = ['#dc2626', '#f59e0b', '#2563eb', '#10b981'];
+            const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+
+            if (password.length > 0) {
+                strength.innerHTML = `
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <div style="flex: 1; height: 4px; background-color: #e2e8f0; border-radius: 2px; overflow: hidden;">
+                                            <div style="width: ${(score / 4) * 100}%; height: 4px; background-color: ${colors[score - 1] || colors[0]}; transition: all 0.3s ease;"></div>
+                                        </div>
+                                        <span style="color: ${colors[score - 1] || colors[0]}; font-weight: 600; font-size: 0.8rem;">
+                                            ${labels[score - 1] || 'Very Weak'}
+                                        </span>
+                                    </div>
+                                    ${feedback.length > 0 ? `<small style="color: #64748b;">Needs: ${feedback.join(', ')}</small>` : ''}
+                                `;
+            } else {
+                strength.innerHTML = '';
+            }
+        });
+    </script>
 }

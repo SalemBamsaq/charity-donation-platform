@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
-@inject SignInManager<CharityDonationPlatform.Domain.Models.ApplicationUser> SignInManager
-@inject UserManager<CharityDonationPlatform.Domain.Models.ApplicationUser> UserManager
+@using CharityDonationPlatform.Domain.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
@@ -79,3 +80,5 @@
             .catch(console.error);
     </script>
 }
+
+

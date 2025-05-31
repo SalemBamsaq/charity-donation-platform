@@ -21,4 +21,10 @@
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="wwwroot\images\" />
+	  <Folder Include="wwwroot\uploads\updates\" />
+	  <Folder Include="wwwroot\uploads\profiles\" />
+	</ItemGroup>
+
 </Project>

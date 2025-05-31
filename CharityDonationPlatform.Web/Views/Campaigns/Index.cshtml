@@ -1,156 +1,239 @@
-﻿@{
+﻿@model CharityDonationPlatform.Web.ViewModels.Campaigns.CampaignListViewModel
+@{
     ViewData["Title"] = "Campaigns";
 }
 
-<div class="container py-5">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h1 class="display-5 fw-bold">All Campaigns</h1>
-            <p class="lead text-muted">Discover causes that inspire you and make a difference today</p>
-        </div>
-        <div class="col-md-4 text-end">
-            @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
-            {
-                <a asp-action="Create" class="btn btn-success btn-lg">
-                    <i class="fas fa-plus me-2"></i>Create Campaign
-                </a>
-            }
-        </div>
-    </div>
-
-    <!-- Filter Options -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <div class="btn-group" role="group">
-                                <a asp-action="Index" asp-route-status="active"
-                                   class="btn @(Model.FilterStatus == "active" ? "btn-primary" : "btn-outline-primary")">
-                                    Active Campaigns
-                                </a>
-                                <a asp-action="Index" asp-route-status="all"
-                                   class="btn @(Model.FilterStatus == "all" ? "btn-primary" : "btn-outline-primary")">
-                                    All Campaigns
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-md-6 text-end">
-                            <span class="text-muted">Showing @Model.Campaigns.Count() campaigns</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Campaigns Grid -->
-    @if (Model.Campaigns.Any())
-    {
+<!-- Header Section -->
+<section class="py-5 text-white" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); padding: 80px 0;">
+    <div class="container">
         <div class="row">
-            @foreach (var campaign in Model.Campaigns)
-            {
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card h-100 shadow-sm campaign-card">
-                        <div class="position-relative">
+            <div class="col-12 text-center">
+                <h1 class="display-4 fw-bold mb-4">All Campaigns</h1>
+                <p class="lead mb-0" style="font-size: 1.3rem;">Discover meaningful causes and make a difference today</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Filter and Stats Section -->
+<section class="py-5" style="background-color: #f8fafc; padding: 60px 0;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8 mb-4 mb-md-0">
+                <div class="d-flex flex-wrap gap-3">
+                    <a asp-controller="Campaigns" asp-action="Index" asp-route-status="active"
+                       class="btn @(Model.FilterStatus == "active" || string.IsNullOrEmpty(Model.FilterStatus) ? "btn-primary" : "btn-outline-primary") px-4 py-2"
+                       style="border-radius: 25px; font-weight: 600; @(Model.FilterStatus == "active" || string.IsNullOrEmpty(Model.FilterStatus) ? "background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none;" : "border-color: #2563eb; color: #2563eb;")">
+                        Active Campaigns
+                    </a>
+                    <a asp-controller="Campaigns" asp-action="Index" asp-route-status="all"
+                       class="btn @(Model.FilterStatus == "all" ? "btn-primary" : "btn-outline-primary") px-4 py-2"
+                       style="border-radius: 25px; font-weight: 600; @(Model.FilterStatus == "all" ? "background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none;" : "border-color: #2563eb; color: #2563eb;")">
+                        All Campaigns
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-4 text-md-end">
+                @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
+                {
+                    <a asp-controller="Campaigns" asp-action="Create" class="btn btn-primary px-4 py-2" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; border-radius: 25px; font-weight: 600;">
+                        <i class="fas fa-plus me-2"></i>Create Campaign
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- Campaign Count -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card border-0" style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.06);">
+                    <p class="mb-0" style="color: #64748b; font-size: 1.1rem;">
+                        <i class="fas fa-info-circle me-2" style="color: #2563eb;"></i>
+                        Showing <strong style="color: #1e293b;">@Model.Campaigns.Count()</strong> campaigns
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Campaigns Grid -->
+<section class="py-5" style="background: white; padding: 80px 0;">
+    <div class="container">
+        @if (Model.Campaigns.Any())
+        {
+            <div class="row">
+                @foreach (var campaign in Model.Campaigns)
+                {
+                    <div class="col-lg-4 col-md-6 mb-5">
+                        <div class="card h-100 border-0 campaign-card" style="border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); transition: all 0.3s ease;">
                             <img src="@(string.IsNullOrEmpty(campaign.ImageUrl) ? "/images/default-campaign.jpg" : campaign.ImageUrl)"
-                                 class="card-img-top" alt="@campaign.Title" style="height: 200px; object-fit: cover;" />
-                            <div class="position-absolute top-0 end-0 m-2">
-                                <span class="badge bg-@(campaign.Status == "Active" ? "success" : campaign.Status == "Funded" ? "primary" : "secondary")">
+                                 class="card-img-top" alt="@campaign.Title" style="height: 220px; object-fit: cover;" />
+
+                            <!-- Status Badge -->
+                            <div class="position-absolute" style="top: 15px; right: 15px;">
+                                <span class="badge px-3 py-2" style="
+                              @if(campaign.Status == "Active") {
+                                        <text>background: linear-gradient(135deg, #2563eb, #1d4ed8);</text>
+                                    } else if(campaign.Status == "Funded") {
+                                        <text>background: linear-gradient(135deg, #10b981, #059669);</text>
+                                    } else if(campaign.Status == "Ended") {
+                                        <text>background: linear-gradient(135deg, #6b7280, #4b5563);</text>
+                                    } else {
+                                        <text>background: linear-gradient(135deg, #f59e0b, #d97706);</text>
+                                    }
+                                    color: white; border-radius: 15px; font-weight: 600; font-size: 0.8rem;">
                                     @campaign.Status
-                                </span>
+                                        </span>
+                            </div>
+
+                            <div class="card-body d-flex flex-column p-4" style="background: white;">
+                                <h5 class="fw-bold mb-3" style="color: #1e293b; font-size: 1.3rem; line-height: 1.4;">@campaign.Title</h5>
+                                <p class="text-muted mb-4" style="line-height: 1.6; font-size: 0.95rem;">
+                                    @if (!string.IsNullOrEmpty(campaign.Description))
+                                    {
+                                        @(campaign.Description.Length > 120 ? campaign.Description.Substring(0, 120) + "..." : campaign.Description)
+                                    }
+                                </p>
+
+                                <!-- Progress Section -->
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="fw-bold" style="color: #1e293b; font-size: 1.1rem;">$@campaign.AmountRaised.ToString("N0")</span>
+                                        <span class="text-muted">of $@campaign.TargetAmount.ToString("N0")</span>
+                                    </div>
+                                    <div class="progress mb-3" style="height: 10px; border-radius: 10px; background-color: #e2e8f0;">
+                                        <div class="progress-bar"
+                                             style="width: @Math.Min(campaign.ProgressPercentage, 100)%; background: linear-gradient(135deg, #2563eb, #1d4ed8); border-radius: 10px;"
+                                             role="progressbar"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-bold" style="color: #2563eb; font-size: 0.9rem;">@campaign.ProgressPercentage.ToString("F1")% funded</span>
+                                        <span class="text-muted" style="font-size: 0.9rem;">@campaign.DaysLeft days left</span>
+                                    </div>
+                                </div>
+
+                                <!-- Campaign Meta -->
+                                <div class="mb-4 p-3" style="background-color: #f8fafc; border-radius: 12px;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div style="font-size: 0.85rem;">
+                                            <span class="text-muted">Created by:</span><br>
+                                            <span class="fw-bold" style="color: #1e293b;">@campaign.CreatedByName</span>
+                                        </div>
+                                        <div class="text-end" style="font-size: 0.85rem;">
+                                            <span class="text-muted">Date:</span><br>
+                                            <span class="fw-bold" style="color: #1e293b;">@campaign.Created.ToString("MMM dd, yyyy")</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="mt-auto">
+                                    <div class="d-grid gap-2">
+                                        <a asp-controller="Campaigns" asp-action="Details" asp-route-id="@campaign.Id"
+                                           class="btn btn-primary fw-bold py-3"
+                                           style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; border-radius: 15px;">
+                                            <i class="fas fa-eye me-2"></i>View Details & Donate
+                                        </a>
+
+                                        @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
+                                        {
+                                            <div class="d-flex gap-2 mt-2">
+                                                <a asp-controller="Campaigns" asp-action="Edit" asp-route-id="@campaign.Id"
+                                                   class="btn btn-outline-secondary flex-fill py-2"
+                                                   style="border-radius: 10px; border-color: #cbd5e1; color: #64748b;">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                @if (User.IsInRole("Admin"))
+                                                {
+                                                    <a asp-controller="Campaigns" asp-action="Delete" asp-route-id="@campaign.Id"
+                                                       class="btn btn-outline-danger flex-fill py-2"
+                                                       style="border-radius: 10px;">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                }
+            </div>
 
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">@campaign.Title</h5>
-                            <p class="card-text text-muted small flex-grow-1">
-                                @(campaign.Description.Length > 120 ? campaign.Description.Substring(0, 120) + "..." : campaign.Description)
+            <!-- Pagination Info -->
+            @if (Model.TotalCount > Model.Campaigns.Count())
+            {
+                <div class="row mt-5">
+                    <div class="col-12 text-center">
+                        <div class="card border-0" style="background-color: #f8fafc; border-radius: 15px; padding: 30px;">
+                            <p class="mb-0" style="color: #64748b; font-size: 1.1rem;">
+                                Showing <strong style="color: #1e293b;">@Model.Campaigns.Count()</strong> of <strong style="color: #1e293b;">@Model.TotalCount</strong> campaigns
                             </p>
-
-                            <!-- Progress Section -->
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between small text-muted mb-1">
-                                    <span><strong>$@campaign.AmountRaised.ToString("N0")</strong> raised</span>
-                                    <span>of <strong>$@campaign.TargetAmount.ToString("N0")</strong></span>
-                                </div>
-                                <div class="progress mb-2" style="height: 8px;">
-                                    <div class="progress-bar" role="progressbar"
-                                         style="width: @campaign.ProgressPercentage%"
-                                         aria-valuenow="@campaign.ProgressPercentage"
-                                         aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                                <div class="d-flex justify-content-between small text-muted">
-                                    <span>@campaign.ProgressPercentage.ToString("F1")% funded</span>
-                                    <span>
-                                        @if (campaign.DaysLeft > 0)
-                                        {
-                                            <text>@campaign.DaysLeft days left</text>
-                                        }
-                                        else
-                                        {
-                                            <text>Campaign ended</text>
-                                        }
-                                    </span>
-                                </div>
-                            </div>
-
-                            <!-- Action Buttons -->
-                            <div class="d-flex gap-2">
-                                <a asp-action="Details" asp-route-id="@campaign.Id" class="btn btn-primary flex-fill">
-                                    <i class="fas fa-eye me-1"></i>View
-                                </a>
-                                @if (User.Identity.IsAuthenticated && campaign.Status == "Active")
-                                {
-                                    <a asp-controller="Donations" asp-action="Donate" asp-route-campaignId="@campaign.Id"
-                                       class="btn btn-success">
-                                        <i class="fas fa-donate"></i>
-                                    </a>
-                                }
-                            </div>
-                        </div>
-
-                        <div class="card-footer bg-transparent border-top-0">
-                            <small class="text-muted">
-                                <i class="fas fa-user me-1"></i>By @campaign.CreatedByName
-                                <span class="float-end">
-                                    <i class="fas fa-calendar me-1"></i>@campaign.Created.ToString("MMM dd, yyyy")
-                                </span>
-                            </small>
                         </div>
                     </div>
                 </div>
             }
-        </div>
-    }
-    else
-    {
-        <div class="text-center py-5">
-            <div class="card border-0 bg-light">
-                <div class="card-body py-5">
-                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                    <h4>No campaigns found</h4>
-                    <p class="text-muted">There are currently no campaigns matching your criteria.</p>
-                    @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
-                    {
-                        <a asp-action="Create" class="btn btn-primary">
-                            <i class="fas fa-plus me-2"></i>Create First Campaign
-                        </a>
-                    }
+        }
+        else
+        {
+            <!-- No Campaigns Message -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-0 text-center" style="background-color: #f8fafc; border-radius: 20px; padding: 80px 40px;">
+                        <i class="fas fa-search mb-4" style="font-size: 5rem; color: #cbd5e1;"></i>
+                        <h4 class="fw-bold mb-3" style="color: #1e293b;">No Campaigns Found</h4>
+                        <p class="text-muted mb-4" style="font-size: 1.1rem;">
+                            @if (Model.FilterStatus == "all")
+                            {
+                                <span>There are no campaigns available at the moment.</span>
+                            }
+                            else
+                            {
+                                <span>There are no active campaigns at the moment.</span>
+                            }
+                        </p>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Staff"))
+                        {
+                            <a asp-controller="Campaigns" asp-action="Create" class="btn btn-primary btn-lg px-5 py-3" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; border-radius: 25px; font-weight: 600;">
+                                <i class="fas fa-plus me-2"></i>Create First Campaign
+                            </a>
+                        }
+                    </div>
                 </div>
             </div>
-        </div>
-    }
-</div>
+        }
+    </div>
+</section>
 
 <style>
-    .campaign-card {
-        transition: transform 0.2s ease-in-out;
+    .campaign-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
     }
 
-        .campaign-card:hover {
-            transform: translateY(-5px);
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+
+    .progress-bar {
+        transition: width 0.8s ease;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 768px) {
+        .campaign-card {
+            margin-bottom: 30px;
         }
+
+        .d-flex.gap-3 {
+            flex-direction: column;
+        }
+
+            .d-flex.gap-3 .btn {
+                width: 100%;
+            }
+    }
 </style>

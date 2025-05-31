@@ -1,8 +1,9 @@
-using CharityDonationPlatform.Application.Interfaces;
+﻿using CharityDonationPlatform.Application.Interfaces;
 using CharityDonationPlatform.Application.Services;
 using CharityDonationPlatform.Domain.Enums;
 using CharityDonationPlatform.Domain.Models;
-using CharityDonationPlatform.Infrastructure.Data;
+using CharityDonationPlatform.Web.ViewModels.UserManagement; 
+using CharityDonationPlatform.Infrastructure.Data; // ← Use Infrastructure context
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
@@ -12,10 +13,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Configure database
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+// Configure database - Using Infrastructure context with Web migrations
+builder.Services.AddDbContext<CharityDonationPlatform.Infrastructure.Data.ApplicationDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        b => b.MigrationsAssembly("CharityDonationPlatform.Web"))); // ← This tells EF to use Web project for migrations
 
 // Configure Identity for .NET 8.0
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
@@ -28,7 +30,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     options.Password.RequiredLength = 6; // Simplified for development
 })
 .AddRoles<IdentityRole>()
-.AddEntityFrameworkStores<ApplicationDbContext>();
+.AddEntityFrameworkStores<CharityDonationPlatform.Infrastructure.Data.ApplicationDbContext>(); // ← Use Infrastructure context
 
 // Configure application cookie
 builder.Services.ConfigureApplicationCookie(options =>
@@ -79,7 +81,7 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     try
     {
-        var context = services.GetRequiredService<ApplicationDbContext>();
+        var context = services.GetRequiredService<CharityDonationPlatform.Infrastructure.Data.ApplicationDbContext>(); // ← Use Infrastructure context
         var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
         var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
@@ -98,8 +100,8 @@ using (var scope = app.Services.CreateScope())
 
 app.Run();
 
-// Seed data method
-async Task SeedData(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+// Seed data method - Updated parameter type
+async Task SeedData(CharityDonationPlatform.Infrastructure.Data.ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
 {
     // Create roles if they don't exist
     if (!await roleManager.RoleExistsAsync(UserRoles.Admin))

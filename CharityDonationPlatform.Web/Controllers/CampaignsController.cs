@@ -20,17 +20,20 @@ namespace CharityDonationPlatform.Web.Controllers
         private readonly IDonationService _donationService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ILogger<CampaignsController> _logger;
 
         public CampaignsController(
             ICampaignService campaignService,
             IDonationService donationService,
             UserManager<ApplicationUser> userManager,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            ILogger<CampaignsController> logger)
         {
             _campaignService = campaignService;
             _donationService = donationService;
             _userManager = userManager;
             _webHostEnvironment = webHostEnvironment;
+            _logger = logger;
         }
 
         public async Task<IActionResult> Index(string status = "active")
@@ -142,29 +145,90 @@ namespace CharityDonationPlatform.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CampaignCreateViewModel model)
         {
-            if (ModelState.IsValid)
+            try
             {
+                // FIXED: Add comprehensive logging for debugging
+                _logger.LogInformation("Campaign creation attempt - Title: {Title}, TargetAmount: {TargetAmount}, User: {UserId}",
+                    model.Title, model.TargetAmount, _userManager.GetUserId(User));
+
+                // FIXED: Check ModelState first and log validation errors
+                if (!ModelState.IsValid)
+                {
+                    foreach (var modelState in ModelState)
+                    {
+                        foreach (var error in modelState.Value.Errors)
+                        {
+                            _logger.LogWarning("ModelState Error - Field: {Field}, Error: {Error}",
+                                modelState.Key, error.ErrorMessage);
+                        }
+                    }
+
+                    ModelState.AddModelError(string.Empty, "Please correct the errors below and try again.");
+                    return View(model);
+                }
+
+                // FIXED: Additional validation
+                if (model.StartDate >= model.EndDate)
+                {
+                    ModelState.AddModelError(nameof(model.EndDate), "End date must be after start date.");
+                    return View(model);
+                }
+
+                if (model.StartDate < DateTime.UtcNow.Date)
+                {
+                    ModelState.AddModelError(nameof(model.StartDate), "Start date cannot be in the past.");
+                    return View(model);
+                }
+
+                if (model.TargetAmount < 1)
+                {
+                    ModelState.AddModelError(nameof(model.TargetAmount), "Target amount must be at least $1.");
+                    return View(model);
+                }
+
+                if (string.IsNullOrWhiteSpace(model.Title))
+                {
+                    ModelState.AddModelError(nameof(model.Title), "Campaign title is required.");
+                    return View(model);
+                }
+
+                if (string.IsNullOrWhiteSpace(model.Description))
+                {
+                    ModelState.AddModelError(nameof(model.Description), "Campaign description is required.");
+                    return View(model);
+                }
+
                 var imageUrl = "/images/default-campaign.jpg";
 
                 // Handle image upload if provided
-                if (model.ImageFile != null)
+                if (model.ImageFile != null && model.ImageFile.Length > 0)
                 {
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ImageFile.FileName);
-                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads/campaigns");
-
-                    if (!Directory.Exists(uploadsFolder))
+                    try
                     {
-                        Directory.CreateDirectory(uploadsFolder);
+                        var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ImageFile.FileName);
+                        var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads/campaigns");
+
+                        if (!Directory.Exists(uploadsFolder))
+                        {
+                            Directory.CreateDirectory(uploadsFolder);
+                        }
+
+                        var filePath = Path.Combine(uploadsFolder, fileName);
+
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await model.ImageFile.CopyToAsync(fileStream);
+                        }
+
+                        imageUrl = $"/uploads/campaigns/{fileName}";
+                        _logger.LogInformation("Campaign image uploaded: {ImageUrl}", imageUrl);
                     }
-
-                    var filePath = Path.Combine(uploadsFolder, fileName);
-
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    catch (Exception ex)
                     {
-                        await model.ImageFile.CopyToAsync(fileStream);
+                        _logger.LogError(ex, "Image upload failed for campaign creation");
+                        ModelState.AddModelError(nameof(model.ImageFile), "Failed to upload image. Campaign will be created with default image.");
+                        // Continue with campaign creation using default image
                     }
-
-                    imageUrl = $"/uploads/campaigns/{fileName}";
                 }
 
                 var campaign = new Campaign
@@ -179,13 +243,29 @@ namespace CharityDonationPlatform.Web.Controllers
                 };
 
                 var userId = _userManager.GetUserId(User);
-                await _campaignService.CreateCampaignAsync(campaign, userId);
+                _logger.LogInformation("Creating campaign for user: {UserId}", userId);
 
-                TempData["SuccessMessage"] = "Campaign created successfully!";
-                return RedirectToAction(nameof(Index));
+                var createdCampaign = await _campaignService.CreateCampaignAsync(campaign, userId);
+
+                if (createdCampaign != null)
+                {
+                    _logger.LogInformation("Campaign created successfully with ID: {CampaignId}", createdCampaign.Id);
+                    TempData["SuccessMessage"] = "Campaign created successfully!";
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    _logger.LogError("Campaign creation returned null for user {UserId}", userId);
+                    ModelState.AddModelError(string.Empty, "Failed to create campaign. Please try again.");
+                    return View(model);
+                }
             }
-
-            return View(model);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating campaign for user {UserId}", _userManager.GetUserId(User));
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred while creating the campaign. Please try again.");
+                return View(model);
+            }
         }
 
         [HttpGet]

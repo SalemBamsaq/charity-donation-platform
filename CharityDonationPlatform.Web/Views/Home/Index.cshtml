@@ -1,280 +1,259 @@
-﻿@model CampaignDetailViewModel
-@inject UserManager<CharityDonationPlatform.Domain.Models.ApplicationUser> UserManager
+﻿@model CharityDonationPlatform.Web.ViewModels.Campaigns.CampaignListViewModel
 @{
-    ViewData["Title"] = Model.Campaign.Title;
+    ViewData["Title"] = "Home";
 }
 
-<div class="container py-5">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
-            <li class="breadcrumb-item"><a asp-controller="Campaigns" asp-action="Index">Campaigns</a></li>
-            <li class="breadcrumb-item active" aria-current="page">@Model.Campaign.Title</li>
-        </ol>
-    </nav>
-
-    <div class="row">
-        <!-- Main Content -->
-        <div class="col-lg-8">
-            <!-- Campaign Header -->
-            <div class="card shadow-sm mb-4">
-                <img src="@(string.IsNullOrEmpty(Model.Campaign.ImageUrl) ? "/images/default-campaign.jpg" : Model.Campaign.ImageUrl)"
-                     class="card-img-top" alt="@Model.Campaign.Title" style="height: 300px; object-fit: cover;" />
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-3">
-                        <h1 class="card-title h2">@Model.Campaign.Title</h1>
-                        <span class="badge bg-@(Model.Campaign.Status == "Active" ? "success" : Model.Campaign.Status == "Funded" ? "primary" : "secondary") fs-6">
-                            @Model.Campaign.Status
-                        </span>
-                    </div>
-
-                    <!-- Progress Stats -->
-                    <div class="row text-center mb-4">
-                        <div class="col-md-4">
-                            <h4 class="text-success">$@Model.Campaign.AmountRaised.ToString("N0")</h4>
-                            <small class="text-muted">Raised</small>
-                        </div>
-                        <div class="col-md-4">
-                            <h4 class="text-primary">@Model.Campaign.ProgressPercentage.ToString("F1")%</h4>
-                            <small class="text-muted">Funded</small>
-                        </div>
-                        <div class="col-md-4">
-                            <h4 class="text-info">@Model.Campaign.DaysLeft</h4>
-                            <small class="text-muted">Days Left</small>
-                        </div>
-                    </div>
-
-                    <!-- Progress Bar -->
-                    <div class="mb-4">
-                        <div class="d-flex justify-content-between small text-muted mb-2">
-                            <span>Goal: $@Model.Campaign.TargetAmount.ToString("N0")</span>
-                            <span>@Model.RecentDonations.Count() donors</span>
-                        </div>
-                        <div class="progress" style="height: 12px;">
-                            <div class="progress-bar bg-success" role="progressbar"
-                                 style="width: @Model.Campaign.ProgressPercentage%"
-                                 aria-valuenow="@Model.Campaign.ProgressPercentage"
-                                 aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-
-                    <!-- Campaign Description -->
-                    <div class="mb-4">
-                        <h5>About This Campaign</h5>
-                        <p class="lead">@Model.Campaign.Description</p>
-                    </div>
-
-                    <!-- Campaign Details -->
-                    <div class="row small text-muted">
-                        <div class="col-md-6">
-                            <i class="fas fa-calendar me-2"></i>Start: @Model.Campaign.StartDate.ToString("MMM dd, yyyy")
-                        </div>
-                        <div class="col-md-6">
-                            <i class="fas fa-calendar-check me-2"></i>End: @Model.Campaign.EndDate.ToString("MMM dd, yyyy")
-                        </div>
-                        <div class="col-md-6 mt-2">
-                            <i class="fas fa-user me-2"></i>Created by: @Model.Campaign.CreatedByName
-                        </div>
-                        <div class="col-md-6 mt-2">
-                            <i class="fas fa-clock me-2"></i>Created: @Model.Campaign.Created.ToString("MMM dd, yyyy")
-                        </div>
-                    </div>
+<!-- Hero Section -->
+<section class="hero-section text-white py-5" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); min-height: 80vh; display: flex; align-items: center;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <h1 class="display-3 fw-bold mb-4">Make a Difference Today</h1>
+                <p class="lead mb-5" style="font-size: 1.4rem; line-height: 1.6;">Join thousands of donors helping to create positive change in communities around the world. Every donation matters.</p>
+                <div class="d-flex flex-wrap gap-4">
+                    <a asp-controller="Campaigns" asp-action="Index" class="btn btn-light btn-lg px-4 py-3" style="border-radius: 50px; font-weight: 600;">
+                        <i class="fas fa-search me-3"></i>Browse Campaigns
+                    </a>
+                    @if (!User.Identity.IsAuthenticated)
+                    {
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg px-4 py-3" style="border-radius: 50px; font-weight: 600; border-width: 2px;">
+                            <i class="fas fa-user-plus me-3"></i>Join Us
+                        </a>
+                    }
                 </div>
             </div>
-
-            <!-- Campaign Updates -->
-            @if (Model.Updates.Any())
-            {
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="fas fa-newspaper me-2"></i>Campaign Updates</h5>
-                    </div>
-                    <div class="card-body">
-                        @foreach (var update in Model.Updates)
-                        {
-                            <div class="border-bottom pb-3 mb-3">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <h6>@update.Title</h6>
-                                    <small class="text-muted">@update.Created.ToString("MMM dd, yyyy")</small>
-                                </div>
-                                <p class="mb-2">@update.Content</p>
-                                @if (!string.IsNullOrEmpty(update.ImageUrl))
-                                {
-                                    <img src="@update.ImageUrl" alt="Update image" class="img-fluid rounded mb-2" style="max-height: 200px;" />
-                                }
-                                <small class="text-muted">By @update.CreatedByName</small>
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
-
-            <!-- Recent Donations -->
-            @if (Model.RecentDonations.Any())
-            {
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="fas fa-heart me-2"></i>Recent Donations</h5>
-                    </div>
-                    <div class="card-body">
-                        @foreach (var donation in Model.RecentDonations.Take(5))
-                        {
-                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
-                                <div>
-                                    <strong>@donation.DisplayDonorName</strong>
-                                    @if (!string.IsNullOrEmpty(donation.Message))
-                                    {
-                                        <br>
-
-                                        <small class="text-muted">"@donation.Message"</small>
-                                    }
-                                </div>
-                                <div class="text-end">
-                                    <span class="fw-bold text-success">$@donation.Amount.ToString("N0")</span>
-                                    <br><small class="text-muted">@donation.DonationDate.ToString("MMM dd")</small>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-            }
-        </div>
-
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <!-- Donation Form -->
-            @if (User.Identity.IsAuthenticated && Model.Campaign.Status == "Active")
-            {
-                <div class="card shadow-sm mb-4 sticky-top" style="top: 20px;">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-donate me-2"></i>Make a Donation</h5>
-                    </div>
-                    <div class="card-body">
-                        <form asp-controller="Donations" asp-action="Donate" method="post">
-                            <input type="hidden" asp-for="NewDonation.CampaignId" value="@Model.Campaign.Id" />
-
-                            <div class="mb-3">
-                                <label class="form-label">Donation Amount</label>
-                                <div class="btn-group d-flex mb-2" role="group">
-                                    <input type="radio" class="btn-check" name="quickAmount" id="amount25" value="25">
-                                    <label class="btn btn-outline-primary" for="amount25">$25</label>
-
-                                    <input type="radio" class="btn-check" name="quickAmount" id="amount50" value="50">
-                                    <label class="btn btn-outline-primary" for="amount50">$50</label>
-
-                                    <input type="radio" class="btn-check" name="quickAmount" id="amount100" value="100">
-                                    <label class="btn btn-outline-primary" for="amount100">$100</label>
-                                </div>
-                                <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input asp-for="NewDonation.Amount" class="form-control" placeholder="Enter amount" required />
-                                </div>
-                                <span asp-validation-for="NewDonation.Amount" class="text-danger"></span>
-                            </div>
-
-                            <div class="mb-3">
-                                <label asp-for="NewDonation.Message" class="form-label">Message (Optional)</label>
-                                <textarea asp-for="NewDonation.Message" class="form-control" rows="3" placeholder="Leave a message of support"></textarea>
-                            </div>
-
-                            <div class="mb-3 form-check">
-                                <input asp-for="NewDonation.IsAnonymous" class="form-check-input" />
-                                <label asp-for="NewDonation.IsAnonymous" class="form-check-label">
-                                    Donate anonymously
-                                </label>
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-success btn-lg">
-                                    <i class="fas fa-heart me-2"></i>Donate Now
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            }
-            else if (!User.Identity.IsAuthenticated)
-            {
-                <div class="card shadow-sm mb-4">
-                    <div class="card-body text-center">
-                        <h5>Support This Campaign</h5>
-                        <p class="text-muted">Login to make a donation and support this cause.</p>
-                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary">
-                            <i class="fas fa-sign-in-alt me-2"></i>Login to Donate
-                        </a>
-                    </div>
-                </div>
-            }
-
-            <!-- Admin Actions -->
-            @if ((User.IsInRole("Admin") || User.IsInRole("Staff")) && (User.IsInRole("Admin") || Model.Campaign.CreatedById == UserManager.GetUserId(User)))
-            {
-                <div class="card shadow-sm mb-4">
-                    <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-cog me-2"></i>Campaign Management</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <a asp-action="Edit" asp-route-id="@Model.Campaign.Id" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-edit me-2"></i>Edit Campaign
-                            </a>
-                            @if (User.IsInRole("Admin"))
-                            {
-                                <a asp-action="Delete" asp-route-id="@Model.Campaign.Id" class="btn btn-outline-danger btn-sm">
-                                    <i class="fas fa-trash me-2"></i>Delete Campaign
-                                </a>
-                            }
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Add Update Form -->
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-plus me-2"></i>Add Update</h6>
-                    </div>
-                    <div class="card-body">
-                        <form asp-action="AddUpdate" method="post" enctype="multipart/form-data">
-                            <input type="hidden" asp-for="NewUpdate.CampaignId" value="@Model.Campaign.Id" />
-
-                            <div class="mb-3">
-                                <label asp-for="NewUpdate.Title" class="form-label">Title</label>
-                                <input asp-for="NewUpdate.Title" class="form-control form-control-sm" required />
-                            </div>
-
-                            <div class="mb-3">
-                                <label asp-for="NewUpdate.Content" class="form-label">Content</label>
-                                <textarea asp-for="NewUpdate.Content" class="form-control form-control-sm" rows="3" required></textarea>
-                            </div>
-
-                            <div class="mb-3">
-                                <label asp-for="NewUpdate.ImageFile" class="form-label">Image (Optional)</label>
-                                <input asp-for="NewUpdate.ImageFile" class="form-control form-control-sm" type="file" accept="image/*" />
-                            </div>
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-success btn-sm">
-                                    <i class="fas fa-plus me-2"></i>Add Update
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            }
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-heart" style="font-size: 12rem; opacity: 0.8; color: rgba(255,255,255,0.9);"></i>
+            </div>
         </div>
     </div>
-</div>
+</section>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        // Quick amount selection
-        document.querySelectorAll('input[name="quickAmount"]').forEach(radio => {
-            radio.addEventListener('change', function () {
-                if (this.checked) {
-                    document.getElementById('NewDonation_Amount').value = this.value;
+<!-- Stats Section -->
+<section class="py-5" style="background-color: #f8fafc; padding: 100px 0;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold mb-3" style="color: #1e293b;">Our Impact</h2>
+                <p class="lead text-muted">See the difference we're making together</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card border-0 h-100 text-center" style="background: white; border-radius: 20px; padding: 40px 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+                    <i class="fas fa-donate mb-4" style="font-size: 3.5rem; color: #2563eb;"></i>
+                    <h3 class="fw-bold mb-3" style="color: #1e293b; font-size: 2.5rem;">$@(Model.Campaigns?.Sum(c => c.AmountRaised).ToString("N0") ?? "0")</h3>
+                    <p class="text-muted mb-0" style="font-size: 1.1rem;">Total Raised</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card border-0 h-100 text-center" style="background: white; border-radius: 20px; padding: 40px 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+                    <i class="fas fa-bullhorn mb-4" style="font-size: 3.5rem; color: #2563eb;"></i>
+                    <h3 class="fw-bold mb-3" style="color: #1e293b; font-size: 2.5rem;">@(Model.TotalCount)</h3>
+                    <p class="text-muted mb-0" style="font-size: 1.1rem;">Active Campaigns</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card border-0 h-100 text-center" style="background: white; border-radius: 20px; padding: 40px 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+                    <i class="fas fa-users mb-4" style="font-size: 3.5rem; color: #2563eb;"></i>
+                    <h3 class="fw-bold mb-3" style="color: #1e293b; font-size: 2.5rem;">1,000+</h3>
+                    <p class="text-muted mb-0" style="font-size: 1.1rem;">Happy Donors</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5" style="background: white; padding: 100px 0;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-5 fw-bold mb-3" style="color: #1e293b;">How It Works</h2>
+                <p class="lead text-muted">Simple steps to make a meaningful impact</p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 mb-5 text-center">
+                <div class="mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 100px; height: 100px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white;">
+                        <i class="fas fa-search" style="font-size: 2.5rem;"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bold mb-3" style="color: #1e293b;">1. Browse Campaigns</h4>
+                <p class="text-muted" style="font-size: 1.1rem; line-height: 1.6;">Discover causes that matter to you from our curated collection of verified campaigns.</p>
+            </div>
+            <div class="col-lg-4 mb-5 text-center">
+                <div class="mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 100px; height: 100px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white;">
+                        <i class="fas fa-heart" style="font-size: 2.5rem;"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bold mb-3" style="color: #1e293b;">2. Choose Your Cause</h4>
+                <p class="text-muted" style="font-size: 1.1rem; line-height: 1.6;">Select the campaign that resonates with your values and desired impact.</p>
+            </div>
+            <div class="col-lg-4 mb-5 text-center">
+                <div class="mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 100px; height: 100px; background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white;">
+                        <i class="fas fa-donate" style="font-size: 2.5rem;"></i>
+                    </div>
+                </div>
+                <h4 class="fw-bold mb-3" style="color: #1e293b;">3. Make a Donation</h4>
+                <p class="text-muted" style="font-size: 1.1rem; line-height: 1.6;">Contribute any amount securely and track the impact of your generosity.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About Our Mission Section -->
+<section class="py-5" style="background-color: #f8fafc; padding: 100px 0;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <h2 class="display-5 fw-bold mb-4" style="color: #1e293b;">Our Mission</h2>
+                <p class="lead mb-4" style="color: #475569; font-size: 1.3rem;">We believe in the power of collective action to create positive change in the world.</p>
+                <p class="mb-4" style="color: #64748b; font-size: 1.1rem; line-height: 1.7;">Through our platform, we connect generous donors with verified charitable campaigns that make a real difference in communities worldwide. Every donation, regardless of size, contributes to meaningful impact.</p>
+                <ul class="list-unstyled">
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-check me-3" style="color: #2563eb; font-size: 1.2rem;"></i>
+                        <span style="font-size: 1.1rem; color: #475569;">100% verified campaigns</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-check me-3" style="color: #2563eb; font-size: 1.2rem;"></i>
+                        <span style="font-size: 1.1rem; color: #475569;">Transparent fund tracking</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-check me-3" style="color: #2563eb; font-size: 1.2rem;"></i>
+                        <span style="font-size: 1.1rem; color: #475569;">Regular impact updates</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-center">
+                        <i class="fas fa-check me-3" style="color: #2563eb; font-size: 1.2rem;"></i>
+                        <span style="font-size: 1.1rem; color: #475569;">Global reach, local impact</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-globe" style="font-size: 10rem; color: #cbd5e1; opacity: 0.8;"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5 text-white" style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); padding: 100px 0;">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="display-5 fw-bold mb-4">Ready to Make a Difference?</h2>
+                <p class="lead mb-5" style="font-size: 1.3rem; line-height: 1.6;">Every donation, no matter the size, has the power to transform lives and create lasting change in communities worldwide.</p>
+                <div class="d-flex flex-wrap justify-content-center gap-4">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a asp-controller="Campaigns" asp-action="Index" class="btn btn-light btn-lg px-5 py-3" style="border-radius: 50px; font-weight: 600; color: #2563eb;">
+                            <i class="fas fa-donate me-3"></i>Start Donating
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-lg px-5 py-3" style="border-radius: 50px; font-weight: 600; color: #2563eb;">
+                            <i class="fas fa-user-plus me-3"></i>Join Our Community
+                        </a>
+                    }
+                    <a asp-controller="Home" asp-action="About" class="btn btn-outline-light btn-lg px-5 py-3" style="border-radius: 50px; font-weight: 600; border-width: 2px;">
+                        <i class="fas fa-info-circle me-3"></i>Learn More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURED CAMPAIGNS - AT THE BOTTOM -->
+<section class="py-5" style="background: white; padding: 100px 0;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3" style="color: #1e293b;">Featured Campaigns</h2>
+            <p class="lead text-muted">Support these urgent causes and make an immediate impact</p>
+            <div class="mx-auto" style="width: 100px; height: 4px; background: linear-gradient(135deg, #2563eb, #1d4ed8); border-radius: 2px; margin-top: 30px;"></div>
+        </div>
+
+        @if (Model.Campaigns != null && Model.Campaigns.Any())
+        {
+            <div class="row justify-content-center">
+                @foreach (var campaign in Model.Campaigns.Take(3))
+                {
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100 border-0 campaign-card" style="border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.08); transition: all 0.3s ease;">
+                            <img src="@(string.IsNullOrEmpty(campaign.ImageUrl) ? "/images/default-campaign.jpg" : campaign.ImageUrl)"
+                                 class="card-img-top" alt="@campaign.Title" style="height: 220px; object-fit: cover;" />
+                            <div class="card-body d-flex flex-column p-4" style="background: white;">
+                                <h5 class="fw-bold mb-3" style="color: #1e293b; font-size: 1.3rem;">@campaign.Title</h5>
+                                <p class="text-muted mb-4" style="line-height: 1.6;">
+                                    @if (!string.IsNullOrEmpty(campaign.Description))
+                                    {
+                                        @(campaign.Description.Length > 100 ? campaign.Description.Substring(0, 100) + "..." : campaign.Description)
+                                    }
+                                </p>
+
+                                <!-- Progress Section -->
+                                <div class="mb-4">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="fw-bold" style="color: #1e293b;">$@campaign.AmountRaised.ToString("N0")</span>
+                                        <span class="text-muted">of $@campaign.TargetAmount.ToString("N0")</span>
+                                    </div>
+                                    <div class="progress mb-3" style="height: 8px; border-radius: 10px; background-color: #e2e8f0;">
+                                        <div class="progress-bar"
+                                             style="width: @Math.Min(campaign.ProgressPercentage, 100)%; background: linear-gradient(135deg, #2563eb, #1d4ed8); border-radius: 10px;"
+                                             role="progressbar"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-bold" style="color: #2563eb; font-size: 0.9rem;">@campaign.ProgressPercentage.ToString("F1")% funded</span>
+                                        <span class="text-muted" style="font-size: 0.9rem;">@campaign.DaysLeft days left</span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-auto">
+                                    <a asp-controller="Campaigns" asp-action="Details" asp-route-id="@campaign.Id"
+                                       class="btn w-100 fw-bold py-3"
+                                       style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border-radius: 15px; border: none;">
+                                        <i class="fas fa-eye me-2"></i>View Details & Donate
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 }
-            });
-        });
-    </script>
-}
+            </div>
+
+            <div class="text-center mt-5">
+                <a asp-controller="Campaigns" asp-action="Index"
+                   class="btn btn-outline-primary btn-lg px-5 py-3"
+                   style="border-radius: 50px; font-weight: 600; border-width: 2px; border-color: #2563eb; color: #2563eb;">
+                    <i class="fas fa-list me-3"></i>View All Campaigns
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="text-center">
+                <div class="card border-0" style="border-radius: 20px; background-color: #f8fafc; padding: 60px 40px;">
+                    <i class="fas fa-exclamation-circle mb-4" style="font-size: 4rem; color: #cbd5e1;"></i>
+                    <h4 class="fw-bold mb-3" style="color: #1e293b;">No Campaigns Available</h4>
+                    <p class="text-muted">Check back soon for new fundraising campaigns to support.</p>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<style>
+    .campaign-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15) !important;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+</style>

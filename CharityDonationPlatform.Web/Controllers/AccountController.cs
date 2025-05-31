@@ -40,65 +40,131 @@ namespace CharityDonationPlatform.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
-            if (ModelState.IsValid)
+            try
             {
-                var profilePictureUrl = "/images/default-profile.png";
-
-                // Handle profile picture upload
-                if (model.ProfilePicture != null)
+                if (ModelState.IsValid)
                 {
-                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ProfilePicture.FileName);
-                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads/profiles");
-
-                    if (!Directory.Exists(uploadsFolder))
+                    // Check if user already exists
+                    var existingUser = await _userManager.FindByEmailAsync(model.Email);
+                    if (existingUser != null)
                     {
-                        Directory.CreateDirectory(uploadsFolder);
+                        ModelState.AddModelError(string.Empty, "A user with this email already exists.");
+                        return View(model);
                     }
 
-                    var filePath = Path.Combine(uploadsFolder, fileName);
+                    var profilePictureUrl = "/images/default-profile.png";
 
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    // Handle profile picture upload
+                    if (model.ProfilePicture != null)
                     {
-                        await model.ProfilePicture.CopyToAsync(fileStream);
+                        try
+                        {
+                            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(model.ProfilePicture.FileName);
+                            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads/profiles");
+
+                            if (!Directory.Exists(uploadsFolder))
+                            {
+                                Directory.CreateDirectory(uploadsFolder);
+                            }
+
+                            var filePath = Path.Combine(uploadsFolder, fileName);
+
+                            using (var fileStream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await model.ProfilePicture.CopyToAsync(fileStream);
+                            }
+
+                            profilePictureUrl = $"/uploads/profiles/{fileName}";
+                        }
+                        catch (Exception ex)
+                        {
+                            // Log the error but don't fail registration for profile picture issues
+                            ModelState.AddModelError(string.Empty, "Profile picture upload failed, but registration will continue with default image.");
+                            profilePictureUrl = "/images/default-profile.png";
+                        }
                     }
 
-                    profilePictureUrl = $"/uploads/profiles/{fileName}";
+                    var user = new ApplicationUser
+                    {
+                        UserName = model.Email,
+                        Email = model.Email,
+                        FirstName = model.FirstName,
+                        LastName = model.LastName,
+                        ProfilePictureUrl = profilePictureUrl ?? "/images/default-profile.png",
+                        EmailConfirmed = true // Since you're auto-confirming emails
+                    };
+
+                    // Create the user first
+                    var result = await _userManager.CreateAsync(user, model.Password);
+
+                    if (result.Succeeded)
+                    {
+                        try
+                        {
+                            // Ensure the Donor role exists before adding user to it
+                            if (!await _roleManager.RoleExistsAsync(UserRoles.Donor))
+                            {
+                                await _roleManager.CreateAsync(new IdentityRole(UserRoles.Donor));
+                            }
+
+                            // Add user to Donor role
+                            var roleResult = await _userManager.AddToRoleAsync(user, UserRoles.Donor);
+                            if (!roleResult.Succeeded)
+                            {
+                                // Log role assignment errors but don't fail registration
+                                foreach (var error in roleResult.Errors)
+                                {
+                                    ModelState.AddModelError(string.Empty, $"Role assignment failed: {error.Description}");
+                                }
+                            }
+
+                            // Generate and confirm email token (since you're auto-confirming)
+                            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                            await _userManager.ConfirmEmailAsync(user, token);
+
+                            // Sign in the user
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+
+                            return RedirectToAction("Index", "Home");
+                        }
+                        catch (Exception ex)
+                        {
+                            // If role assignment fails, still allow the user to be created
+                            // but add an error message
+                            ModelState.AddModelError(string.Empty, "Account created successfully, but there was an issue with role assignment. Please contact support if you experience any issues.");
+
+                            // Still sign them in
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+                            return RedirectToAction("Index", "Home");
+                        }
+                    }
+                    else
+                    {
+                        // Add all Identity errors to ModelState
+                        foreach (var error in result.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, error.Description);
+                        }
+                    }
                 }
-
-                var user = new ApplicationUser
+                else
                 {
-                    UserName = model.Email,
-                    Email = model.Email,
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    ProfilePictureUrl = profilePictureUrl
-                };
-
-                var result = await _userManager.CreateAsync(user, model.Password);
-
-                if (result.Succeeded)
-                {
-                    // By default, make all new users Donors
-                    await _userManager.AddToRoleAsync(user, UserRoles.Donor);
-
-                    // Generate email confirmation token
-                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-                    // For development, we'll just automatically confirm the email
-                    await _userManager.ConfirmEmailAsync(user, token);
-
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Index", "Home");
+                    // Add a general error message if ModelState is invalid
+                    ModelState.AddModelError(string.Empty, "Please correct the errors below and try again.");
                 }
+            }
+            catch (Exception ex)
+            {
+                // Catch any unexpected exceptions
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred during registration. Please try again.");
 
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+                // In development, you might want to see the actual error:
+                // ModelState.AddModelError(string.Empty, $"Debug: {ex.Message}");
             }
 
             return View(model);
         }
+
 
         [HttpGet]
         public IActionResult Login(string returnUrl = null)

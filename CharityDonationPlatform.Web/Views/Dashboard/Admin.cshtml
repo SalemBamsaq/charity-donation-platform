@@ -3,71 +3,75 @@
     ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="display-5 fw-bold">Admin Dashboard</h1>
-            <p class="lead text-muted">Platform overview and management</p>
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6 fw-bold">
+            <i class="fas fa-chart-line me-3" style="color: #2563eb;"></i>Admin Dashboard
+        </h1>
+        <div>
+            <a asp-controller="Campaigns" asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Create Campaign
+            </a>
         </div>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- Statistics Cards -->
     <div class="row mb-4">
         <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-success text-white h-100">
-                <div class="card-body">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <div class="card-body text-white">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h4>$@Model.TotalAmountRaised.ToString("N0")</h4>
-                            <p class="mb-0">Total Raised</p>
+                            <h6 class="card-title text-white-50">Total Raised</h6>
+                            <h3 class="fw-bold">$@Model.TotalAmountRaised.ToString("N0")</h3>
                         </div>
                         <div class="align-self-center">
-                            <i class="fas fa-dollar-sign fa-2x"></i>
+                            <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-primary text-white h-100">
-                <div class="card-body">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                <div class="card-body text-white">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h4>@Model.TotalDonorsCount</h4>
-                            <p class="mb-0">Total Donors</p>
+                            <h6 class="card-title text-white-50">Total Donors</h6>
+                            <h3 class="fw-bold">@Model.TotalDonorsCount.ToString("N0")</h3>
                         </div>
                         <div class="align-self-center">
-                            <i class="fas fa-users fa-2x"></i>
+                            <i class="fas fa-users fa-2x opacity-75"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-info text-white h-100">
-                <div class="card-body">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                <div class="card-body text-white">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h4>@Model.ActiveCampaignsCount</h4>
-                            <p class="mb-0">Active Campaigns</p>
+                            <h6 class="card-title text-white-50">Active Campaigns</h6>
+                            <h3 class="fw-bold">@Model.ActiveCampaignsCount</h3>
                         </div>
                         <div class="align-self-center">
-                            <i class="fas fa-bullhorn fa-2x"></i>
+                            <i class="fas fa-bullhorn fa-2x opacity-75"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-lg-3 col-md-6 mb-3">
-            <div class="card bg-warning text-white h-100">
-                <div class="card-body">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                <div class="card-body text-white">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h4>@Model.TotalCampaignsCount</h4>
-                            <p class="mb-0">Total Campaigns</p>
+                            <h6 class="card-title text-white-50">Total Campaigns</h6>
+                            <h3 class="fw-bold">@Model.TotalCampaignsCount</h3>
                         </div>
                         <div class="align-self-center">
-                            <i class="fas fa-chart-bar fa-2x"></i>
+                            <i class="fas fa-chart-bar fa-2x opacity-75"></i>
                         </div>
                     </div>
                 </div>
@@ -77,94 +81,60 @@
 
     <div class="row">
         <!-- Recent Campaigns -->
-        <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Recent Campaigns</h5>
-                    <a asp-controller="Campaigns" asp-action="Create" class="btn btn-success btn-sm">
-                        <i class="fas fa-plus me-2"></i>New Campaign
-                    </a>
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-bullhorn me-2" style="color: #2563eb;"></i>Recent Campaigns
+                        </h5>
+                        <a asp-controller="Campaigns" asp-action="Index" class="btn btn-outline-primary btn-sm">View All</a>
+                    </div>
                 </div>
                 <div class="card-body">
                     @if (Model.RecentCampaigns.Any())
                     {
                         @foreach (var campaign in Model.RecentCampaigns)
                         {
-                            <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                            <div class="d-flex align-items-center border-bottom pb-3 mb-3">
                                 <img src="@(string.IsNullOrEmpty(campaign.ImageUrl) ? "/images/default-campaign.jpg" : campaign.ImageUrl)"
-                                     alt="@campaign.Title" class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;" />
+                                     class="rounded me-3" alt="@campaign.Title" style="width: 60px; height: 60px; object-fit: cover;" />
                                 <div class="flex-grow-1">
-                                    <h6 class="mb-1">@campaign.Title</h6>
-                                    <small class="text-muted">
-                                        $@campaign.AmountRaised.ToString("N0") of $@campaign.TargetAmount.ToString("N0")
-                                        (@campaign.ProgressPercentage.ToString("F1")%)
-                                    </small>
-                                    <div class="progress mt-1" style="height: 4px;">
-                                        <div class="progress-bar" style="width: @campaign.ProgressPercentage%"></div>
+                                    <h6 class="mb-1">
+                                        <a asp-controller="Campaigns" asp-action="Details" asp-route-id="@campaign.Id"
+                                           class="text-decoration-none">@campaign.Title</a>
+                                    </h6>
+                                    <div class="progress mb-1" style="height: 6px;">
+                                        <div class="progress-bar bg-success" style="width: @campaign.ProgressPercentage%"></div>
                                     </div>
+                                    <small class="text-muted">
+                                        $@campaign.AmountRaised.ToString("N0") of $@campaign.TargetAmount.ToString("N0") raised
+                                    </small>
                                 </div>
-                                <div class="ms-3">
+                                <div class="text-end">
                                     <span class="badge bg-@(campaign.Status == "Active" ? "success" : "secondary")">
                                         @campaign.Status
                                     </span>
                                 </div>
                             </div>
                         }
-                        <div class="text-center">
-                            <a asp-controller="Campaigns" asp-action="Index" class="btn btn-outline-primary btn-sm">
-                                View All Campaigns
-                            </a>
-                        </div>
                     }
                     else
                     {
-                        <p class="text-muted text-center">No campaigns found</p>
+                        <p class="text-muted text-center py-4">No campaigns found.</p>
                     }
                 </div>
             </div>
         </div>
 
-        <!-- Recent Donations -->
-        <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-heart me-2"></i>Recent Donations</h5>
-                    <a asp-action="ExportDonations" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-download me-2"></i>Export
-                    </a>
-                </div>
-                <div class="card-body">
-                    @if (Model.RecentDonations.Any())
-                    {
-                        @foreach (var donation in Model.RecentDonations)
-                        {
-                            <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
-                                <div>
-                                    <h6 class="mb-1">@donation.DisplayDonorName</h6>
-                                    <small class="text-muted">@donation.CampaignTitle</small>
-                                </div>
-                                <div class="text-end">
-                                    <span class="fw-bold text-success">$@donation.Amount.ToString("N0")</span>
-                                    <br><small class="text-muted">@donation.DonationDate.ToString("MMM dd")</small>
-                                </div>
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <p class="text-muted text-center">No donations found</p>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Top Donors -->
-        <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-trophy me-2"></i>Top Donors</h5>
+        <!-- Top Donors & Recent Donations -->
+        <div class="col-lg-4">
+            <!-- Top Donors -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white border-0 pb-0">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-trophy me-2" style="color: #f59e0b;"></i>Top Donors
+                    </h5>
                 </div>
                 <div class="card-body">
                     @if (Model.TopDonors.Any())
@@ -172,79 +142,49 @@
                         @foreach (var donor in Model.TopDonors)
                         {
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span>@donor.Key</span>
-                                <span class="fw-bold text-success">$@donor.Value.ToString("N0")</span>
+                                <span class="fw-medium">@donor.Key</span>
+                                <span class="text-success fw-bold">$@donor.Value.ToString("N0")</span>
                             </div>
                         }
                     }
                     else
                     {
-                        <p class="text-muted text-center">No donor data available</p>
+                        <p class="text-muted small">No donors yet.</p>
                     }
                 </div>
             </div>
-        </div>
 
-        <!-- Top Campaigns -->
-        <div class="col-lg-6 mb-4">
-            <div class="card h-100">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Top Campaigns by Amount</h5>
-                </div>
-                <div class="card-body">
-                    @if (Model.TopCampaigns.Any())
-                    {
-                        @foreach (var campaign in Model.TopCampaigns)
-                        {
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <span class="text-truncate me-2">@campaign.Key</span>
-                                <span class="fw-bold text-primary">$@campaign.Value.ToString("N0")</span>
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <p class="text-muted text-center">No campaign data available</p>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <a asp-controller="Campaigns" asp-action="Create" class="btn btn-success w-100">
-                                <i class="fas fa-plus fa-2x d-block mb-2"></i>
-                                Create Campaign
-                            </a>
-                        </div>
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <a asp-controller="Campaigns" asp-action="Index" class="btn btn-primary w-100">
-                                <i class="fas fa-list fa-2x d-block mb-2"></i>
-                                Manage Campaigns
-                            </a>
-                        </div>
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <a asp-action="ExportDonations" class="btn btn-info w-100">
-                                <i class="fas fa-download fa-2x d-block mb-2"></i>
-                                Export Donations
-                            </a>
-                        </div>
-                        <div class="col-lg-3 col-md-6 mb-3">
-                            <a asp-action="ExportCampaigns" class="btn btn-warning w-100">
-                                <i class="fas fa-file-export fa-2x d-block mb-2"></i>
-                                Export Campaigns
-                            </a>
-                        </div>
+            <!-- Recent Donations -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-heart me-2" style="color: #dc2626;"></i>Recent Donations
+                        </h5>
+                        <a asp-controller="Donations" asp-action="Index" class="btn btn-outline-primary btn-sm">View All</a>
                     </div>
+                </div>
+                <div class="card-body">
+                    @if (Model.RecentDonations.Any())
+                    {
+                        @foreach (var donation in Model.RecentDonations.Take(5))
+                        {
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <div class="fw-medium">@donation.DonorName</div>
+                                    <small class="text-muted">@donation.CampaignTitle</small>
+                                </div>
+                                <div class="text-end">
+                                    <div class="fw-bold text-success">$@donation.Amount.ToString("N0")</div>
+                                    <small class="text-muted">@donation.DonationDate.ToString("MMM dd")</small>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted small">No donations yet.</p>
+                    }
                 </div>
             </div>
         </div>

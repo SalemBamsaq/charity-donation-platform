@@ -29,9 +29,11 @@ namespace CharityDonationPlatform.Web.ViewModels.Account
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
 
+        // Explicitly mark as NOT required
         [Display(Name = "Profile Picture")]
-        public IFormFile ProfilePicture { get; set; }
+        public IFormFile? ProfilePicture { get; set; }
 
-        public string ProfilePictureUrl { get; set; }
+        // Explicitly mark as NOT required and exclude from validation
+        public string? ProfilePictureUrl { get; set; }
     }
 }

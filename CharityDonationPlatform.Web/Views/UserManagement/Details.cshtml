@@ -1,0 +1,183 @@
+﻿@model UserDetailsViewModel
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a asp-controller="Dashboard" asp-action="Admin">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a asp-action="Index">User Management</a>
+            </li>
+            <li class="breadcrumb-item active">User Details</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <!-- User Profile Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <img src="@(string.IsNullOrEmpty(Model.ProfilePictureUrl) ? "/images/default-profile.png" : Model.ProfilePictureUrl)"
+                             alt="Profile Picture" class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;" />
+                    </div>
+                    <h5 class="fw-bold">@Model.FullName</h5>
+                    <p class="text-muted">@Model.Email</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <span class="badge bg-@Model.RoleBadgeClass">@Model.Role</span>
+                        <span class="badge bg-@Model.StatusClass">@Model.StatusBadge</span>
+                        @if (Model.EmailConfirmed)
+                        {
+                            <span class="badge bg-success">Email Confirmed</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning">Email Not Confirmed</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>Edit User
+                        </a>
+                        <form asp-action="ToggleStatus" asp-route-id="@Model.Id" method="post" class="d-inline">
+                            <button type="submit"
+                                    class="btn btn-@(Model.IsActive ? "warning" : "success") w-100"
+                                    onclick="return confirm('Are you sure you want to @(Model.IsActive ? "deactivate" : "activate") this user?')">
+                                <i class="fas fa-@(Model.IsActive ? "pause" : "play") me-2"></i>
+                                @(Model.IsActive ? "Deactivate" : "Activate") User
+                            </button>
+                        </form>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Users
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <!-- User Information -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>User Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">First Name</label>
+                            <div class="form-control-plaintext">@Model.FirstName</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Last Name</label>
+                            <div class="form-control-plaintext">@Model.LastName</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Email Address</label>
+                            <div class="form-control-plaintext">@Model.Email</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">User Role</label>
+                            <div class="form-control-plaintext">
+                                <span class="badge bg-@Model.RoleBadgeClass">@Model.Role</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Account Status</label>
+                            <div class="form-control-plaintext">
+                                <span class="badge bg-@Model.StatusClass">@Model.StatusBadge</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Email Status</label>
+                            <div class="form-control-plaintext">
+                                @if (Model.EmailConfirmed)
+                                {
+                                    <span class="badge bg-success">Confirmed</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Not Confirmed</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Member Since</label>
+                            <div class="form-control-plaintext">@Model.Created.ToString("MMMM dd, yyyy")</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">User ID</label>
+                            <div class="form-control-plaintext">
+                                <code>@Model.Id</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role Permissions -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>Role Permissions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @switch (Model.Role)
+                    {
+                        case "Admin":
+                            <div class="alert alert-danger">
+                                <h6><i class="fas fa-user-shield me-2"></i>Administrator</h6>
+                                <ul class="mb-0">
+                                    <li>Full access to all platform features</li>
+                                    <li>User management and role assignment</li>
+                                    <li>Campaign management and oversight</li>
+                                    <li>System configuration and settings</li>
+                                    <li>Financial reports and analytics</li>
+                                </ul>
+                            </div>
+                            break;
+                        case "Staff":
+                            <div class="alert alert-warning">
+                                <h6><i class="fas fa-user-tie me-2"></i>Staff Member</h6>
+                                <ul class="mb-0">
+                                    <li>Create and manage campaigns</li>
+                                    <li>View donation reports</li>
+                                    <li>Respond to user inquiries</li>
+                                    <li>Update campaign information</li>
+                                    <li>Limited administrative access</li>
+                                </ul>
+                            </div>
+                            break;
+                        default:
+                            <div class="alert alert-primary">
+                                <h6><i class="fas fa-heart me-2"></i>Donor</h6>
+                                <ul class="mb-0">
+                                    <li>Browse and view campaigns</li>
+                                    <li>Make donations to campaigns</li>
+                                    <li>View personal donation history</li>
+                                    <li>Update personal profile</li>
+                                    <li>Receive campaign updates</li>
+                                </ul>
+                            </div>
+                            break;
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

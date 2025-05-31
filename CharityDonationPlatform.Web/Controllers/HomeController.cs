@@ -43,7 +43,7 @@ namespace CharityDonationPlatform.Web.Controllers
                 TotalCount = activeCampaigns.Count()
             };
 
-            return View(viewModel);
+            return View(viewModel); // This should match @model CampaignListViewModel in Index.cshtml
         }
 
         public IActionResult Privacy()

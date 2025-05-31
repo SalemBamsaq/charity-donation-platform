@@ -1,0 +1,206 @@
+﻿@model UserManagementIndexViewModel
+@{
+    ViewData["Title"] = "User Management";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6 fw-bold">
+            <i class="fas fa-users me-3" style="color: #2563eb;"></i>User Management
+        </h1>
+        <div>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-user-plus me-2"></i>Create New User
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title text-white-50">Total Users</h6>
+                            <h3 class="fw-bold">@Model.TotalUsers</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-users fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title text-white-50">Admins</h6>
+                            <h3 class="fw-bold">@Model.AdminCount</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-shield fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title text-white-50">Staff</h6>
+                            <h3 class="fw-bold">@Model.StaffCount</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-user-tie fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <div class="card-body text-white">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="card-title text-white-50">Donors</h6>
+                            <h3 class="fw-bold">@Model.DonorCount</h3>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="fas fa-heart fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Search Users</label>
+                    <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control"
+                           placeholder="Search by name or email..." />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Filter by Role</label>
+                    <select name="roleFilter" class="form-select">
+                        <option value="">All Roles</option>
+                        <option value="Admin" selected="@(Model.RoleFilter == "Admin")">Admin</option>
+                        <option value="Staff" selected="@(Model.RoleFilter == "Staff")">Staff</option>
+                        <option value="Donor" selected="@(Model.RoleFilter == "Donor")">Donor</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-2"></i>Search
+                    </button>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary w-100">
+                        <i class="fas fa-times me-2"></i>Clear
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>Users (@Model.Users.Count())
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Users.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>User</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in Model.Users)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3"
+                                                 style="width: 40px; height: 40px;">
+                                                <i class="fas fa-user text-white"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">@user.FullName</div>
+                                                @if (!user.EmailConfirmed)
+                                                {
+                                                    <small class="text-warning">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>Email not confirmed
+                                                    </small>
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>@user.Email</td>
+                                    <td>
+                                        <span class="badge bg-@(user.Role == "Admin" ? "danger" : user.Role == "Staff" ? "warning" : "primary")">
+                                            @user.Role
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-@user.StatusClass">@user.StatusBadge</span>
+                                    </td>
+                                    <td>@user.Created.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Details" asp-route-id="@user.Id"
+                                               class="btn btn-outline-info btn-sm" title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a asp-action="Edit" asp-route-id="@user.Id"
+                                               class="btn btn-outline-primary btn-sm" title="Edit User">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form asp-action="ToggleStatus" asp-route-id="@user.Id" method="post" class="d-inline">
+                                                <button type="submit"
+                                                        class="btn btn-outline-@(user.IsActive ? "warning" : "success") btn-sm"
+                                                        title="@(user.IsActive ? "Deactivate" : "Activate")"
+                                                        onclick="return confirm('Are you sure you want to @(user.IsActive ? "deactivate" : "activate") this user?')">
+                                                    <i class="fas fa-@(user.IsActive ? "pause" : "play")"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No users found</h5>
+                    <p class="text-muted">Try adjusting your search criteria or create a new user.</p>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="fas fa-user-plus me-2"></i>Create First User
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,166 @@
+﻿@model EditUserViewModel
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a asp-controller="Dashboard" asp-action="Admin">Dashboard</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a asp-action="Index">User Management</a>
+            </li>
+            <li class="breadcrumb-item active">Edit User</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-edit me-2"></i>Edit User
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div asp-validation-summary="All" class="alert alert-danger mb-4" role="alert"></div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="FirstName" class="form-label">First Name</label>
+                                <input asp-for="FirstName" class="form-control" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="LastName" class="form-label">Last Name</label>
+                                <input asp-for="LastName" class="form-control" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">Email Address</label>
+                            <input asp-for="Email" class="form-control" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Role" class="form-label">User Role</label>
+                            <select asp-for="Role" class="form-select">
+                                <option value="Donor">Donor</option>
+                                <option value="Staff">Staff</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger"></span>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input asp-for="IsActive" class="form-check-input" />
+                                    <label asp-for="IsActive" class="form-check-label">
+                                        Account is active
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input asp-for="EmailConfirmed" class="form-check-input" />
+                                    <label asp-for="EmailConfirmed" class="form-check-label">
+                                        Email is confirmed
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Password Reset Section -->
+                        <div class="card bg-light mb-4">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-key me-2"></i>Password Management
+                                </h6>
+                                <p class="card-text text-muted small">
+                                    To reset the user's password, enter a new password below.
+                                </p>
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <input type="password" id="newPassword" class="form-control"
+                                               placeholder="Enter new password (leave blank to keep current)" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="button" id="resetPasswordBtn" class="btn btn-outline-warning w-100">
+                                            <i class="fas fa-key me-2"></i>Reset Password
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Users
+                            </a>
+                            <div>
+                                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-info me-2">
+                                    <i class="fas fa-eye me-2"></i>View Details
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Update User
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('resetPasswordBtn').addEventListener('click', function () {
+            const newPassword = document.getElementById('newPassword').value;
+
+            if (!newPassword) {
+                alert('Please enter a new password');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                alert('Password must be at least 6 characters long');
+                return;
+            }
+
+            if (confirm('Are you sure you want to reset this user\'s password?')) {
+                const userId = '@Model.Id';
+
+                fetch('@Url.Action("ResetPassword")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: `id=${userId}&newPassword=${encodeURIComponent(newPassword)}`
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Password reset successfully');
+                            document.getElementById('newPassword').value = '';
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        alert('An error occurred while resetting the password');
+                        console.error('Error:', error);
+                    });
+            }
+        });
+    </script>
+}

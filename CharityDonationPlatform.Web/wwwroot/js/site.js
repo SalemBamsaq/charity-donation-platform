@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    document.querySelectorAll('a[href^="#"]').forEach(function (anchor) {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
             const targetId = this.getAttribute('href').substring(1);
@@ -241,27 +241,68 @@ window.CharityPlatform = {
         return emailRegex.test(email);
     },
 
-    // Load notifications count
+    // Load notifications count with error handling
     loadNotificationCount: function () {
+        // Only try to load notifications if user is authenticated
+        const notificationBadge = document.getElementById('notification-badge');
+        if (!notificationBadge) {
+            return; // No notification badge, user probably not logged in
+        }
+
         fetch('/api/Notifications/count')
-            .then(response => response.json())
-            .then(data => {
-                const badge = document.getElementById('notification-badge');
-                if (badge && data.count > 0) {
-                    badge.textContent = data.count;
-                    badge.style.display = 'inline';
-                } else if (badge) {
-                    badge.style.display = 'none';
+            .then(function (response) {
+                if (!response.ok) {
+                    // If API doesn't exist or fails, just hide the badge
+                    if (notificationBadge) {
+                        notificationBadge.style.display = 'none';
+                    }
+                    return null;
+                }
+                return response.json();
+            })
+            .then(function (data) {
+                if (data && notificationBadge) {
+                    if (data.count > 0) {
+                        notificationBadge.textContent = data.count;
+                        notificationBadge.style.display = 'inline';
+                    } else {
+                        notificationBadge.style.display = 'none';
+                    }
                 }
             })
-            .catch(error => console.error('Error loading notification count:', error));
+            .catch(function (error) {
+                // Silently handle errors - API might not be implemented yet
+                console.log('Notifications API not available:', error.message);
+                if (notificationBadge) {
+                    notificationBadge.style.display = 'none';
+                }
+            });
     }
 };
 
+// NOTIFICATION LOADING DISABLED UNTIL API IS IMPLEMENTED
+// This prevents 404 errors in the console
+/*
 // Load notification count on page load if user is authenticated
-if (document.querySelector('.navbar .dropdown-toggle')) {
+const navbarDropdown = document.querySelector('.navbar .dropdown-toggle');
+if (navbarDropdown && document.getElementById('notification-badge')) {
     CharityPlatform.loadNotificationCount();
 
-    // Refresh notification count every 30 seconds
-    setInterval(CharityPlatform.loadNotificationCount, 30000);
+    // Refresh notification count every 30 seconds, but only if the API works
+    const testInterval = setInterval(function () {
+        fetch('/api/Notifications/count')
+            .then(function (response) {
+                if (response.ok) {
+                    CharityPlatform.loadNotificationCount();
+                } else {
+                    // API not working, stop trying
+                    clearInterval(testInterval);
+                }
+            })
+            .catch(function () {
+                // API not working, stop trying
+                clearInterval(testInterval);
+            });
+    }, 30000);
 }
+*/
